@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getPollById, deletePoll, updatePollVotes } from '@/lib/db/polls';
+import { getPollById, deletePoll, updatePollVotes, hasUserVoted } from '@/lib/db/polls';
 import { createClient } from '@/lib/supabase/server';
 import { isAdminUser } from '@/lib/utils';
+
+const VOTER_COOKIE = 'pollify_voter_id';
+const VOTER_COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year
 
 // GET single poll by ID
 export async function GET(
@@ -57,43 +60,67 @@ export async function PATCH(
       return NextResponse.json({ error: 'Invalid poll ID format' }, { status: 400 });
     }
 
+    // Determine who's voting: real user if logged in, otherwise a
+    // persistent anonymous cookie ID. Never trust a userId sent by the client.
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    const existingVoterCookie = request.cookies.get(VOTER_COOKIE)?.value;
+    const voterId = user?.id ?? existingVoterCookie ?? crypto.randomUUID();
+    const shouldSetVoterCookie = !user && !existingVoterCookie;
+
+    if (await hasUserVoted(pollIdNum, voterId)) {
+      return NextResponse.json({ error: 'You have already voted on this poll' }, { status: 409 });
+    }
+
+    let response: NextResponse;
+
     // Handle single vote (for multi/rank polls)
     if (body.optionId) {
-      const { optionId, userId } = body;
+      const { optionId } = body;
       if (!optionId) {
         return NextResponse.json({ error: 'Option ID is required' }, { status: 400 });
       }
 
-      const updatedOption = await updatePollVotes(pollIdNum, optionId, userId);
-      
-      return NextResponse.json({ 
-        message: 'Vote recorded successfully',
-        option: updatedOption 
-      });
-    }
+      const updatedOption = await updatePollVotes(pollIdNum, optionId, voterId);
 
-    // Handle multiple votes (for yes/no polls)
-    if (body.votes) {
+      response = NextResponse.json({
+        message: 'Vote recorded successfully',
+        option: updatedOption
+      });
+    } else if (body.votes) {
+      // Handle multiple votes (for yes/no polls)
       const { votes } = body; // votes = {optionId: 'yes'|'no'|'maybe'}
-      
+
       if (Object.keys(votes).length === 0) {
         return NextResponse.json({ error: 'No votes provided' }, { status: 400 });
       }
 
       // Store each vote separately in the database
       const votePromises = Object.entries(votes).map(async ([optionId, voteType]) => {
-        return await updatePollVotes(pollIdNum, optionId, undefined, voteType as 'yes' | 'no' | 'maybe');
+        return await updatePollVotes(pollIdNum, optionId, voterId, voteType as 'yes' | 'no' | 'maybe');
       });
 
       await Promise.all(votePromises);
-      
-      return NextResponse.json({ 
+
+      response = NextResponse.json({
         message: 'All votes recorded successfully',
-        votesCount: Object.keys(votes).length 
+        votesCount: Object.keys(votes).length
+      });
+    } else {
+      return NextResponse.json({ error: 'Invalid request format' }, { status: 400 });
+    }
+
+    if (shouldSetVoterCookie) {
+      response.cookies.set(VOTER_COOKIE, voterId, {
+        httpOnly: true,
+        sameSite: 'lax',
+        maxAge: VOTER_COOKIE_MAX_AGE,
+        path: '/',
       });
     }
 
-    return NextResponse.json({ error: 'Invalid request format' }, { status: 400 });
+    return response;
   } catch (err) {
     console.error('Error updating votes:', err);
     return NextResponse.json({ 

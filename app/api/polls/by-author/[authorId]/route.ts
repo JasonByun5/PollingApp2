@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { createPoll, getAllPolls, getPollsByAuthor } from '@/lib/db/polls';
+import { getPollsByAuthor } from '@/lib/db/polls';
+import { isAdminUser } from '@/lib/utils';
 
 
 export async function GET(
@@ -9,9 +10,19 @@ export async function GET(
 ) {
   try{
 
-    //convert authorId params to number
     const resolvedParams = await params;
     const authorIdStr = resolvedParams.authorId;
+
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    }
+
+    if (user.id !== authorIdStr && !isAdminUser(user)) {
+      return NextResponse.json({ error: 'Forbidden: not your polls' }, { status: 403 });
+    }
 
     const poll = await getPollsByAuthor(authorIdStr);
     return NextResponse.json(poll);

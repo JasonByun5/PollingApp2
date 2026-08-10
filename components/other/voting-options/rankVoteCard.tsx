@@ -43,6 +43,11 @@ function RankVoteCard ({options, pollId, setVoted}: MultiVoteCardProps) {
         body: JSON.stringify({ optionId: selected }),
       })
 
+      if (res.status === 409) {
+        alert('You have already voted on this poll');
+        return;
+      }
+
       if (!res.ok){
         throw new Error("failed to vote")
       }
