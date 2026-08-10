@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getPollById, deletePoll, updatePollVotes } from '@/lib/db/polls';
+import { createClient } from '@/lib/supabase/server';
+import { isAdminUser } from '@/lib/utils';
 
 // GET single poll by ID
 export async function GET(
@@ -112,6 +114,22 @@ export async function DELETE(
 
     if (isNaN(pollIdNum)) {
       return NextResponse.json({ error: 'Invalid poll ID format' }, { status: 400 });
+    }
+
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    }
+
+    const poll = await getPollById(pollIdNum);
+    const isOwner = poll.author === user.id;
+    const isAdmin = isAdminUser(user);
+
+
+    if (!isOwner && !isAdmin) {
+      return NextResponse.json({ error: 'Forbidden: not the poll owner or an admin' }, { status: 403 });
     }
 
     await deletePoll(pollIdNum);
