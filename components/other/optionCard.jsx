@@ -1,17 +1,16 @@
 function OptionCard({ option, onDelete }) {
-  // Support both old (index) and new (id) structures
   const optionKey = option.id || option.index;
   const imageUrl = option.image_url || option.imageUrl;
-  
-  // Debug logging to see what data we're getting
-  console.log('OptionCard option:', option);
-  console.log('OptionCard imageUrl:', imageUrl);
-  
+
   return (
-    <div key={optionKey} className="min-w-[180px] min-h-[180px] border border-gray-100 rounded-xl bg-white shadow p-2 flex relative flex-col items-center justify-center group">
+    <div
+      key={optionKey}
+      className="relative flex min-h-[180px] min-w-[180px] flex-col items-center justify-center rounded-lg border border-border bg-card p-3 shadow-[0_1px_4px_rgba(26,31,54,0.04)]"
+    >
       {onDelete && (
         <button
-          className="absolute top-1 right-1 text-red-400 text-sm"
+          type="button"
+          className="absolute right-2 top-2 text-sm text-muted-foreground transition-colors hover:text-destructive"
           onClick={() => onDelete(optionKey)}
         >
           ✕
@@ -21,16 +20,18 @@ function OptionCard({ option, onDelete }) {
       {imageUrl ? (
         <>
           <img src={imageUrl} alt="option" className="h-40 object-contain" />
-          <span className="mt-1 text-sm bg-pink-200 px-1 rounded">{option.title}</span>
+          <span className="mt-2 rounded-[6px] bg-secondary px-2 py-0.5 text-sm font-medium text-foreground">
+            {option.title}
+          </span>
         </>
       ) : (
-        <span className="mt-1 text-2xl bg-pink-200 px-1 rounded">{option.title}</span>
+        <span className="rounded-[6px] bg-secondary px-3 py-1 text-xl font-medium text-foreground">
+          {option.title}
+        </span>
       )}
 
-      
-
       {option.description && (
-        <div className="mt-1 text-sm px-1 rounded">
+        <div className="mt-2 px-1 text-center text-sm text-muted-foreground">
           {option.description}
         </div>
       )}

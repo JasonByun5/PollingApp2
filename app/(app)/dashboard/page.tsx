@@ -4,6 +4,9 @@ import {useState, useEffect} from "react";
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import type { PollType } from '@/lib/poll-types';
+import { PageShell, PageHeader } from "@/components/page-shell";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 type User = {
   id: string;
@@ -20,7 +23,6 @@ type Poll = {
 const PAGE_SIZE = 20;
 
 function ViewPoll () {
-
   const [user, setUser] = useState<User | null>(null);
   const [polls, setPolls] = useState<Poll[]>([]);
   const [hasMore, setHasMore] = useState(false);
@@ -29,7 +31,6 @@ function ViewPoll () {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const router = useRouter();
 
-  //checks for user auth
   useEffect(() => {
     const checkAuth = async () => {
       const supabase = createClient();
@@ -99,61 +100,102 @@ function ViewPoll () {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div>Loading...</div>
+      <div className="flex min-h-[50vh] items-center justify-center text-muted-foreground">
+        Loading...
       </div>
     );
   }
 
   if (!user) {
-    return(
-      <div>
-        not logged in!
-      </div>
-    )
+    return (
+      <PageShell size="md">
+        <div className="space-y-4 text-center">
+          <h2 className="text-xl font-semibold text-foreground">Not logged in</h2>
+          <p className="text-muted-foreground">Sign in to view your polls.</p>
+          <Button onClick={() => router.push('/login')}>
+            Go to Login
+          </Button>
+        </div>
+      </PageShell>
+    );
   }
 
-  return(
-    
-    <div>
-      <div className="flex justify-center p-10 text-lg">
-        <div className="w-3/5 bg-red-50 px-20 py-10 rounded-2xl flex flex-col shadow-md">
-          <p className="mb-3 font-bold underline">Previous Polls:</p>
-          <div className="w-full bg-gray-100 p-3 rounded-lg mb-5 grid grid-cols-5 gap-1 underline font-bold">
-              <p>Title</p> 
-              <p>Poll ID</p>
-              <p> Poll Type </p>
-              <p> Created At </p>
-              <p>See Polls</p>
-            </div>
-          {polls.map((poll: Poll) => (
-            <div key={poll.poll_id} className="w-full bg-gray-100 p-3 rounded-lg mb-5 grid grid-cols-5 gap-1">
-              <p>{poll.title}</p>
-              <p>{poll.poll_id}</p>
-              <p> {poll.type} </p>
-              <p> {new Date(poll.created_at).toLocaleDateString()}</p>
-               <button 
-                  type="button" 
-                  className="bg-red-200 rounded-full text-xl"
-                  onClick={() => router.push(`/dashboard/polls/${poll.poll_id}`)}
-                >📊</button>
-            </div>
-          ))}
-          {hasMore && (
-            <button
-              type="button"
-              onClick={handleLoadMore}
-              disabled={isLoadingMore}
-              className="self-center bg-red-200 rounded px-4 py-2 disabled:opacity-50"
-            >
-              {isLoadingMore ? 'Loading...' : 'Load more'}
-            </button>
-          )}
+  return (
+    <PageShell size="xl">
+      <PageHeader
+        title="Your polls"
+        description="Browse and open results for polls you've created."
+        action={
+          <Button onClick={() => router.push('/create')}>
+            Create poll
+            <span aria-hidden="true">→</span>
+          </Button>
+        }
+      />
+
+      {polls.length === 0 ? (
+        <div className="rounded-lg border border-dashed border-border px-6 py-12 text-center">
+          <p className="text-muted-foreground">No polls yet.</p>
+          <Button className="mt-4" onClick={() => router.push('/create')}>
+            Create your first poll
+          </Button>
         </div>
-      </div>
-    </div>
+      ) : (
+        <div className="overflow-hidden rounded-lg border border-border">
+          <div className="hidden grid-cols-[1.5fr_1fr_0.8fr_0.8fr_auto] gap-4 border-b border-border bg-secondary/60 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground sm:grid">
+            <span>Title</span>
+            <span>Poll ID</span>
+            <span>Type</span>
+            <span>Created</span>
+            <span className="text-right">Results</span>
+          </div>
 
-  )
+          <ul className="divide-y divide-border">
+            {polls.map((poll: Poll) => (
+              <li
+                key={poll.poll_id}
+                className="grid grid-cols-1 gap-2 px-4 py-4 transition-colors hover:bg-secondary/40 sm:grid-cols-[1.5fr_1fr_0.8fr_0.8fr_auto] sm:items-center sm:gap-4"
+              >
+                <p className="font-medium text-foreground">{poll.title}</p>
+                <p className="truncate font-mono text-sm text-muted-foreground">{poll.poll_id}</p>
+                <div>
+                  <Badge variant="secondary" className="font-normal">
+                    {poll.type}
+                  </Badge>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  {new Date(poll.created_at).toLocaleDateString()}
+                </p>
+                <div className="sm:text-right">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => router.push(`/dashboard/polls/${poll.poll_id}`)}
+                  >
+                    View
+                  </Button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
+      {hasMore && (
+        <div className="mt-6 flex justify-center">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleLoadMore}
+            disabled={isLoadingMore}
+          >
+            {isLoadingMore ? 'Loading...' : 'Load more'}
+          </Button>
+        </div>
+      )}
+    </PageShell>
+  );
 }
+
 export default ViewPoll;

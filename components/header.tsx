@@ -1,18 +1,23 @@
 'use client';
 
 import { AuthButton } from "@/components/auth/auth-button";
-import { Suspense, use } from "react";
+import { Suspense } from "react";
 import { useRouter } from "next/navigation";
 
 export function Header() {
-
   const router = useRouter();
 
   return (
-    <header className="w-full border-b border-b-foreground/10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <nav className="w-full flex justify-between items-center p-3 px-5 max-w-7xl mx-auto">
-        <div className="font-semibold text-lg" onClick={() => router.push('/')}>Polling App!</div>
-        <Suspense>
+    <header className="sticky top-0 z-40 w-full border-b border-border/80 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+      <nav className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
+        <button
+          type="button"
+          onClick={() => router.push("/")}
+          className="cursor-pointer text-[17px] font-semibold tracking-tight text-foreground transition-colors hover:text-primary"
+        >
+          Pollify
+        </button>
+        <Suspense fallback={<div className="h-8 w-24 animate-pulse rounded-md bg-muted" />}>
           <AuthButton />
         </Suspense>
       </nav>

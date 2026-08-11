@@ -60,8 +60,9 @@ export function SignUpForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">Sign up</CardTitle>
-          <CardDescription>Create a new account</CardDescription>
+          <p className="mb-1 text-sm font-medium text-primary">Pollify</p>
+          <CardTitle className="text-2xl">Create your account</CardTitle>
+          <CardDescription>Join Pollify to create and manage polls</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSignUp}>

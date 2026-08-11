@@ -8,11 +8,12 @@ import {
 
 export default function Page() {
   return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+    <div className="flex w-full items-center justify-center px-6 py-16 md:py-24">
       <div className="w-full max-w-sm">
         <div className="flex flex-col gap-6">
           <Card>
             <CardHeader>
+              <p className="mb-1 text-sm font-medium text-primary">Pollify</p>
               <CardTitle className="text-2xl">
                 Thank you for signing up!
               </CardTitle>

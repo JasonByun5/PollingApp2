@@ -6,7 +6,11 @@ import { createClient } from '@/lib/supabase/client';
 import { getImageValidationError } from '@/lib/uploads';
 import { POLL_TYPES, type PollType } from '@/lib/poll-types';
 import OptionCard from "../../../components/other/optionCard";
-
+import { PageShell, PageHeader } from "@/components/page-shell";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 type PollOption = {
   index: number;
@@ -32,22 +36,16 @@ function NewPoll(){
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
 
   const [activeType, setActiveType] = useState<PollType | null>(null);
   const buttons = POLL_TYPES;
 
-  //for the toast notif
   const [ alertMsg, setAlertMsg] = useState('');
   const[showAlert, setShowAlert] = useState(false);
 
-  
-  //for the popup
   const router = useRouter();
   const [showSuccess, setShowSuccess] = useState(false);
   const [newPollId, setNewPollId] = useState<string | null>(null);
-
-
 
   const ShowCustomAlert = (msg: string) => {
     setAlertMsg(msg);
@@ -57,7 +55,6 @@ function NewPoll(){
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Check Supabase authentication
   useEffect(() => {
     const checkAuth = async () => {
       const supabase = createClient();
@@ -75,7 +72,6 @@ function NewPoll(){
     
     checkAuth();
   }, []);
-
 
   const handleRemoveOption = (index: number) => {
     setOptions(prev => prev.filter(opt => opt.index !== index));
@@ -115,8 +111,6 @@ function NewPoll(){
     setCurrentOptionImage(file);
   }
 
-
-
   const handleAddOption = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -152,7 +146,6 @@ function NewPoll(){
   };
 
   const handleSubmitPoll = async () => {
-    // Prevent multiple submissions
     if (isSubmitting) return;
 
     if (!pollTitle.trim()) {
@@ -168,7 +161,7 @@ function NewPoll(){
       return;
     }
 
-    setIsSubmitting(true); // Start loading
+    setIsSubmitting(true);
 
     if (!user) {
       ShowCustomAlert("User not authenticated.");
@@ -191,12 +184,10 @@ function NewPoll(){
     
     formData.append("payload", JSON.stringify(payload));
     
-    // Append files in order to match options array
-    options.forEach((o, index) => {
+    options.forEach((o) => {
       if (o.file) {
         formData.append("files", o.file);
       } else {
-        // Append empty file if no file to maintain index alignment
         formData.append("files", new File([], ""));
       }
     });
@@ -211,7 +202,7 @@ function NewPoll(){
         throw new Error("Failed to create poll");
       }
 
-      const data = await res.json(); //confgire a response from the backend if we want
+      const data = await res.json();
 
       setNewPollId(data.pollId);
       setShowSuccess(true);
@@ -226,214 +217,215 @@ function NewPoll(){
       ShowCustomAlert("Error submitting poll.");
       console.error(err);
     } finally {
-      setIsSubmitting(false); // Stop loading regardless of success/failure
+      setIsSubmitting(false);
     }
   }
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div>Loading...</div>
+      <div className="flex min-h-[50vh] items-center justify-center text-muted-foreground">
+        Loading...
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold mb-4">Authentication Required</h2>
-          <p>You need to login to create a new poll.</p>
-          <button 
-            onClick={() => router.push('/login')}
-            className="mt-4 px-4 py-2 bg-red-200 text-black rounded hover:bg-red-300"
-          >
+      <PageShell size="md">
+        <div className="space-y-4 text-center">
+          <h2 className="text-xl font-semibold text-foreground">Authentication required</h2>
+          <p className="text-muted-foreground">You need to log in to create a new poll.</p>
+          <Button onClick={() => router.push('/login')}>
             Go to Login
-          </button>
+          </Button>
         </div>
-      </div>
+      </PageShell>
     );
   }
+
   return(
     <div>
       {showSuccess && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-xl p-6 w-80 text-center space-y-4">
-            <h2 className="text-xl font-semibold text-red-300">Poll created!</h2>
-
-            <p className="text-sm">
-              <span className="font-medium">Poll&nbsp;ID:</span>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40">
+          <div className="w-80 space-y-4 rounded-xl border border-border bg-card p-6 text-center shadow-[0_8px_30px_rgba(26,31,54,0.12)]">
+            <h2 className="text-xl font-semibold text-foreground">Poll created</h2>
+            <p className="text-sm text-muted-foreground">
+              <span className="font-medium text-foreground">Poll ID</span>
               <br />
-              <span className="font-mono text-gray-700">{newPollId}</span>
+              <span className="font-mono text-foreground">{newPollId}</span>
             </p>
-
             <div className="flex justify-center gap-3">
-              <button
+              <Button
                 onClick={() => {
                   setShowSuccess(false);
                   router.push("/dashboard");
                 }}
-                className="bg-red-200 hover:bg-red-300 text-white px-3 py-1 rounded"
               >
                 View my polls
-              </button>
-
-              <button
+              </Button>
+              <Button
+                variant="secondary"
                 onClick={() => setShowSuccess(false)}
-                className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded"
               >
                 Make another
-              </button>
+              </Button>
             </div>
           </div>
         </div>
       )}
 
-      <div className="flex justify-center p-10">
-        <div className="w-3/5 bg-red-50 px-20 py-10 rounded-2xl flex flex-col shadow-md">
-          
-          {/*Form Questions*/}
-          <form className="w-full rounded-lg mb-5 flex flex-col  gap-1"> 
-            <h1 className='text-[22px] font-bold'>Poll Title / Question</h1>
-            <input 
+      <PageShell size="xl">
+        <PageHeader
+          title="Create a poll"
+          description="Add a title, choose a type, and build your options."
+        />
+
+        <form className="mb-8 flex w-full flex-col gap-5">
+          <div className="space-y-2">
+            <Label htmlFor="poll-title">Poll title / question</Label>
+            <Input
+              id="poll-title"
               type="text"
               placeholder="Type your question here"
               value={pollTitle}
               onChange={(e) => setPollTitle(e.target.value)}
-              className='w-full border border-gray-300 rounded px-3 py-1 text-sm mb-5'
             />
-            <h1 className='text-[22px] font-bold' >Description (optional)</h1>
-            <textarea 
-              placeholder="Brief Description (E.g. Explain the options"
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="poll-description">Description (optional)</Label>
+            <textarea
+              id="poll-description"
+              placeholder="Brief description of the options"
               value={pollDescription}
               onChange={(e) => setPollDescription(e.target.value)}
-              className='w-full h-20 border border-gray-300 rounded px-3 py-1 text-sm'
+              className="flex min-h-20 w-full rounded-[6px] border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             />
-          </form>
-          
-          {/*Poll Type*/}
-          <div className='flex justify-between mb-5'>
-            <h1 className='text-[22px] font-bold'> Poll Type: </h1>
+          </div>
+        </form>
 
+        <div className="mb-8 space-y-3">
+          <Label>Poll type</Label>
+          <div className="flex flex-wrap gap-2">
             {buttons.map((type) => (
               <button
                 key={type}
+                type="button"
                 onClick={() => {
                   setActiveType(type)
                   setPollType(type)
                 }}
-                className={`rounded px-3 py-1 w-24 ${
-                  activeType === type ?  'bg-red-300' : 'bg-red-200'
-                }`}
+                className={cn(
+                  "rounded-[6px] border px-4 py-2 text-sm font-medium transition-colors",
+                  activeType === type
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-input bg-background text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                )}
               >
                 {type}
               </button>
             ))}
           </div>
+        </div>
 
-
-          {/*Options*/}
-          <div className='flex flex-row'>
-
-            {/*Option form*/}
-            <div className='w-2/5 h-96 border border-gray-300 rounded-xl mr-10 py-5 overflow-y-auto'>
-              <form className="w-full rounded-lg mb-5 flex flex-col items-center gap-1"  onSubmit={handleAddOption}>
-                <h1 className='text-lg font-bold'>Option Name* </h1>
-                <input 
+        <div className="flex flex-col gap-6 lg:flex-row">
+          <div className="w-full rounded-lg border border-border bg-background p-5 lg:w-2/5">
+            <form className="flex flex-col gap-4" onSubmit={handleAddOption}>
+              <div className="space-y-2">
+                <Label htmlFor="option-title">Option name*</Label>
+                <Input
+                  id="option-title"
                   type="text"
-                  placeholder="Type your question here"
+                  placeholder="Option title"
                   value={currentOptionTitle}
                   onChange={(e) => setCurrentOptionTitle(e.target.value)}
-                  className='w-4/5 border border-gray-300 rounded px-3 py-1 text-sm mb-5'
                 />
-                <h1 className='text-lg font-bold' >Option Description</h1>
-                <textarea 
-                  placeholder="Brief Description (E.g. Explain the options)"
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="option-desc">Option description</Label>
+                <textarea
+                  id="option-desc"
+                  placeholder="Brief description"
                   value={currentOptionDesc}
                   onChange={(e) => setCurrentOptionDesc(e.target.value)}
-                  className='w-4/5 h-20 border border-gray-300  rounded px-3 py-1 text-sm mb-3'
+                  className="flex min-h-20 w-full rounded-[6px] border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 />
-
-                
-
-                <div className="flex gap-4">
-                  {currentOptionImage ? (
-                    <button 
-                      type="button"
-                      onClick={handleRemoveImage}
-                      className="bg-red-200 p-2 rounded-full text-xl text-red-600 font-extrabold hover:bg-red-300"
-                    >
-                      ✕
-                    </button>
-                  ) : (
-                    <>
-                      <label htmlFor="file-upload" className="bg-red-200 p-2 rounded-full text-xl cursor-pointer hover:bg-red-300">
-                        📤
-                      </label>
-                      <input 
-                        id ="file-upload"
-                        type="file"  
-                        ref={fileInputRef}
-                        accept="image/*" 
-                        onChange={(e) => handleImageSelected(e.target.files?.[0] || null)}
-                        className='hidden'
-                      />
-                    </>
-                  )}
-
-                  <button 
-                    className="bg-red-200 p-2 rounded-full text-xl hover:bg-red-300"
-                    type="button"
-                    onClick={() => handleTrashOption()}
-                  >🗑️</button>
-                  <button 
-                    type="submit" 
-                    className="bg-red-200 p-2 rounded-full text-xl hover:bg-red-300"
-                  >➕</button>
-                </div>
-
-              </form>
-            </div>
-
-            {/*Options existing*/}
-            <div className='w-3/5 h-full' >
-              <div className="grid grid-cols-2 gap-y-4">
-                {options.map(option => (
-                  <OptionCard key={option.index} option={option} onDelete={() => handleRemoveOption(option.index)}/>
-              ))}
               </div>
-            </div>
+
+              <div className="flex flex-wrap gap-2">
+                {currentOptionImage ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleRemoveImage}
+                  >
+                    Remove image
+                  </Button>
+                ) : (
+                  <>
+                    <Label
+                      htmlFor="file-upload"
+                      className="inline-flex h-8 cursor-pointer items-center rounded-[6px] border border-input bg-background px-3 text-xs font-medium hover:bg-accent"
+                    >
+                      Upload image
+                    </Label>
+                    <input
+                      id="file-upload"
+                      type="file"
+                      ref={fileInputRef}
+                      accept="image/*"
+                      onChange={(e) => handleImageSelected(e.target.files?.[0] || null)}
+                      className="hidden"
+                    />
+                  </>
+                )}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleTrashOption()}
+                >
+                  Clear
+                </Button>
+                <Button type="submit" size="sm">
+                  Add option
+                </Button>
+              </div>
+            </form>
           </div>
-          
-          <div className="w-full flex justify-between">
-            <div>
-              {showAlert && (
-                <div className=" bg-red-500 mt-4 text-white px-6 py-2 rounded shadow-lg z-50 transition-all">
-                  {alertMsg}
-                </div>
+
+          <div className="w-full lg:w-3/5">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {options.map(option => (
+                <OptionCard key={option.index} option={option} onDelete={() => handleRemoveOption(option.index)}/>
+              ))}
+              {options.length === 0 && (
+                <p className="col-span-full text-sm text-muted-foreground">
+                  No options yet. Add one to get started.
+                </p>
               )}
             </div>
-            
-            <button
-              onClick={handleSubmitPoll}
-              disabled={isSubmitting}
-              className={`mt-4 px-4 py-2 text-white rounded transition-colors ${
-                isSubmitting 
-                  ? 'bg-gray-400 cursor-not-allowed' 
-                  : 'bg-green-600 hover:bg-green-700'
-              }`}
-            >
-              {isSubmitting ? 'Creating Poll...' : 'Submit Poll'}
-            </button>
-
           </div>
-          
-
         </div>
-      </div>
+
+        <div className="mt-8 flex w-full items-center justify-between gap-4">
+          <div>
+            {showAlert && (
+              <div className="rounded-[6px] bg-destructive px-4 py-2 text-sm text-destructive-foreground shadow-sm">
+                {alertMsg}
+              </div>
+            )}
+          </div>
+          <Button
+            onClick={handleSubmitPoll}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Creating poll...' : 'Submit poll'}
+          </Button>
+        </div>
+      </PageShell>
     </div>
   )
 }
-
 
 export default NewPoll;

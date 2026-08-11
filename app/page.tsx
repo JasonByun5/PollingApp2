@@ -1,71 +1,90 @@
 'use client';
+
 import { useRouter } from 'next/navigation';
 import React, { useState } from "react";
-
+import { PageShell } from "@/components/page-shell";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function Home() {
-
   const [formCode, setFormCode] = useState("");
-  const [adminCode, setAdminCode] = useState("");
   const router = useRouter();
-  
+
   return (
-    <div className="flex justify-center p-10">
-      <div className="w-1/2 bg-red-50 px-20 rounded-2xl flex flex-col shadow-md">
-        <div className="flex flex-col justify-evenly min-h-150">
-          <h1 className="flex justify-center text-2xl">
-            Welcome! You have been invited to participate in a poll!
+    <PageShell size="md">
+      <div className="flex flex-col gap-10">
+        <div className="space-y-2 text-center sm:text-left">
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-[28px]">
+            Welcome to Pollify
           </h1>
+          <p className="text-[15px] leading-relaxed text-muted-foreground">
+            Enter a poll code to join, or jump into your dashboard and create something new.
+          </p>
+        </div>
 
-          <form
-            className="flex flex-col justify-center gap-4 items-center"
-            onSubmit={(e) => {
-              e.preventDefault(); // Prevent default form submission
-              if (formCode.trim()) {
-                router.push(`/polls/${formCode}`);
-              }
-            }}
-          >
-            <h1>Put in the form code</h1>
-            <div>
-              <input
-                type="text"
-                placeholder="ex: 1234"
-                value={formCode}
-                onChange={(e) => setFormCode(e.target.value)}
-                className="border border-gray-300 rounded px-3 py-1 text-sm "
-              />
-              <button
-                type="submit"
-                className="cursor-pointer border rounded px-3 bg-black text-red-50"
-              >
-                Take me there!
-              </button>
-            </div>
-          </form>
-
-
-          <div className='flex flex-row justify-evenly mt-10'>
-            <button
-              onClick={() => router.push('/dashboard')}
-              className="w-40 h-40 cursor-pointer border-2 border-black rounded-3xl bg-gray-100"
-            >
-              <img src="/images/DashboardPic.jpeg" alt="create a poll" className="w-full h-full object-cover rounded-3xl"/>
-            </button>
-
-
-            {/* Creating a poll button */}
-              <button
-                onClick={() => router.push('/create')}
-                className="w-40 h-40 cursor-pointer border-2 border-black rounded-3xl bg-gray-100"
-              >
-                <img src="/images/NewPollPic.png" alt="create a poll" className="w-full h-full object-cover rounded-3xl"/>       
-              </button>
-
+        <form
+          className="flex flex-col gap-3"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (formCode.trim()) {
+              router.push(`/polls/${formCode}`);
+            }
+          }}
+        >
+          <Label htmlFor="form-code" className="text-foreground">
+            Poll code
+          </Label>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <Input
+              id="form-code"
+              type="text"
+              placeholder="e.g. 1234"
+              value={formCode}
+              onChange={(e) => setFormCode(e.target.value)}
+              className="sm:flex-1"
+            />
+            <Button type="submit" className="sm:shrink-0">
+              Continue
+              <span aria-hidden="true">→</span>
+            </Button>
           </div>
+        </form>
 
+        <div className="grid gap-3 sm:grid-cols-2">
+          <button
+            type="button"
+            onClick={() => router.push('/dashboard')}
+            className="group flex flex-col items-start gap-1 rounded-lg border border-border bg-background p-5 text-left shadow-[0_1px_4px_rgba(26,31,54,0.04)] transition-colors hover:border-primary/40 hover:bg-secondary/60"
+          >
+            <span className="flex w-full items-center justify-between text-[15px] font-semibold text-foreground">
+              Dashboard
+              <span className="text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary">
+                →
+              </span>
+            </span>
+            <span className="text-sm leading-relaxed text-muted-foreground">
+              View and manage the polls you&apos;ve created.
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => router.push('/create')}
+            className="group flex flex-col items-start gap-1 rounded-lg border border-border bg-background p-5 text-left shadow-[0_1px_4px_rgba(26,31,54,0.04)] transition-colors hover:border-primary/40 hover:bg-secondary/60"
+          >
+            <span className="flex w-full items-center justify-between text-[15px] font-semibold text-foreground">
+              Create a poll
+              <span className="text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary">
+                →
+              </span>
+            </span>
+            <span className="text-sm leading-relaxed text-muted-foreground">
+              Build a new multi, yes/no, or ranked poll.
+            </span>
+          </button>
         </div>
       </div>
-    </div>
+    </PageShell>
   );
 }

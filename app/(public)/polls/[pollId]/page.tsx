@@ -7,8 +7,10 @@ import MultiVoteCard from "../../../../components/other/voting-options/multiVote
 import YesNoVoteCard from "../../../../components/other/voting-options/yesNoVoteCard";
 import RankVoteCard from "../../../../components/other/voting-options/rankVoteCard";
 import type { PollType } from "@/lib/poll-types";
+import { PageShell } from "@/components/page-shell";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
-// Force dynamic rendering to avoid prerendering issues with dynamic routes
 export const dynamic = 'force-dynamic';
 
 interface PollOption {
@@ -63,60 +65,64 @@ export default function PollVote() {
 
   }, [pollId]);
 
-  
+  if (loading || !poll) {
+    return (
+      <div className="flex min-h-[50vh] items-center justify-center text-muted-foreground">
+        Loading...
+      </div>
+    );
+  }
 
-  if (loading || !poll) return <div>Loading...</div>;
-
-  
   return (
     <div>
       {voted && (
-          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-            <div className="bg-white rounded-xl shadow-xl p-6 w-80 text-center space-y-4">
-              <h2 className="text-xl font-semibold text-red-300">You Voted!</h2>
-
-              <div className="flex justify-center gap-3">
-                <button
-                  onClick={() => {
-                    setVoted(false);
-                    router.push('/')
-                  }}
-                  className="bg-red-200 hover:bg-red-300 text-white px-3 py-1 rounded"
-                >Take me back!</button>
-            </div> 
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40">
+          <div className="w-80 space-y-4 rounded-xl border border-border bg-card p-6 text-center shadow-[0_8px_30px_rgba(26,31,54,0.12)]">
+            <h2 className="text-xl font-semibold text-foreground">You voted!</h2>
+            <p className="text-sm text-muted-foreground">Thanks for participating.</p>
+            <div className="flex justify-center">
+              <Button
+                onClick={() => {
+                  setVoted(false);
+                  router.push('/')
+                }}
+              >
+                Take me back
+              </Button>
+            </div>
           </div>
         </div>
       )}
 
-
-      <div className="flex justify-center p-10">
-        <div className="w-3/5 bg-red-50 px-20 py-10 rounded-2xl flex flex-col shadow-md">
-          <div className="w-full bg-white p-6 rounded-t-lg flex justify-evenly gap-1"> 
-            <p className='text-[22px] font-bold'>{poll.title}</p>
-            <p className='text-[18px] font-bold rounded px-2 py-1 w-24 bg-red-200 flex justify-center'>{poll.type}</p>
+      <PageShell size="lg">
+        <div className="mb-8 space-y-3 border-b border-border pb-6">
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-[28px]">
+              {poll.title}
+            </h1>
+            <Badge variant="secondary" className="font-normal">
+              {poll.type}
+            </Badge>
           </div>
-          <div className="w-full bg-gray-200 py-9 px-6 rounded-b-lg mb-5 flex justify-evenly gap-1">
-            {poll.description && <p className='text-[15px] font-bold'>{poll.description}</p>}
-          </div>
-
-          {poll.type === "multi" && (
-            <MultiVoteCard options={poll.poll_options} pollId={pollId} setVoted={setVoted}/>
+          {poll.description && (
+            <p className="max-w-2xl text-[15px] leading-relaxed text-muted-foreground">
+              {poll.description}
+            </p>
           )}
-
-                    
-          {poll.type === "yes/no" && (
-            <YesNoVoteCard options={poll.poll_options} pollId={pollId} setVoted={setVoted}/>
-          )}
-
-
-          {poll.type === "rank" && (
-              <RankVoteCard options={poll.poll_options} pollId={pollId} setVoted={setVoted} />
-          )}
-
-
         </div>
-      </div>
+
+        {poll.type === "multi" && (
+          <MultiVoteCard options={poll.poll_options} pollId={pollId} setVoted={setVoted}/>
+        )}
+
+        {poll.type === "yes/no" && (
+          <YesNoVoteCard options={poll.poll_options} pollId={pollId} setVoted={setVoted}/>
+        )}
+
+        {poll.type === "rank" && (
+          <RankVoteCard options={poll.poll_options} pollId={pollId} setVoted={setVoted} />
+        )}
+      </PageShell>
     </div>
   )
-
 }

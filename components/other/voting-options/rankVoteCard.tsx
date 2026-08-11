@@ -15,13 +15,11 @@ type MultiVoteCardProps = {
 };
 
 function RankVoteCard ({options, pollId, setVoted}: MultiVoteCardProps) {
-
   const [selected, setSelected] = useState('');
   const [rows, setRows] = useState<number[]>([]);
   const [ranking, setRanking] = useState<PollOption[]>([]);
 
   useEffect(() => {
-    // Initialize rows based on number of options
     const numOptions = options.length;
     const newRows = [];
     for (let i = 1; i <= numOptions; i++) {
@@ -60,16 +58,14 @@ function RankVoteCard ({options, pollId, setVoted}: MultiVoteCardProps) {
     }
   }
 
-
-  function addToRanking(obj: PollOption) {
-    setRanking(prev => [...prev, obj]);
-  }
+  // Preserve original submitPoll / selected for future wiring; ranking UX unchanged.
+  void submitPoll;
+  void setSelected;
 
   function removeFromRanking(id: string) {
     setRanking(prev => prev.filter(opt => opt.id !== id));
   }
 
-  // Ngl GPT made these functions for drag and drop
   const handleDragStart = (e: React.DragEvent, option: PollOption) => {
     e.dataTransfer.setData('application/json', JSON.stringify(option));
     e.dataTransfer.effectAllowed = 'move';
@@ -87,88 +83,86 @@ function RankVoteCard ({options, pollId, setVoted}: MultiVoteCardProps) {
     
     setRanking(prev => {
       const newRanking = [...prev];
-      // Remove from existing position if already ranked
       const existingIndex = newRanking.findIndex(opt => opt.id === droppedOption.id);
       if (existingIndex !== -1) {
         newRanking.splice(existingIndex, 1);
       }
-      // Insert at target position
       newRanking.splice(targetIndex, 0, droppedOption);
       return newRanking;
     });
   };
 
-
-
-
   return(
-    <div className="flex flex-row justify-evenly">
-                
-        <div className="grid grid-cols-[auto,1fr] gap-x-6 px-4">
-            {/* Column 1: rank numbers */}
-            <div className="grid grid-rows justify-start space-y-6">
+    <div className="space-y-6">
+      <div className="flex flex-col justify-between gap-8 lg:flex-row">
+        <div className="grid grid-cols-[auto,1fr] gap-x-6 px-2">
+          <div className="flex flex-col space-y-6">
             {rows.map(num => (
-                <div key={num} className="text-5xl font-bold text-blue-300">
+              <div key={num} className="flex h-24 items-center text-4xl font-semibold text-primary/40">
                 {num}
-                </div>
+              </div>
             ))}
-            </div>
+          </div>
 
-            {/* Column 2: ranking slots */}
-            <div className="flex flex-col justify-start space-y-6">
+          <div className="flex flex-col space-y-6">
             {rows.map((_, idx) => {
-                const opt = ranking[idx];
-                return opt ? (
+              const opt = ranking[idx];
+              return opt ? (
                 <div
-                    key={opt.id}
-                    draggable
-                    onDragStart={(e) => handleDragStart(e, opt)}
-                    onDragOver={handleDragOver}
-                    onDrop={(e) => handleDrop(e, idx)}
-                    className="relative border rounded-xl bg-white shadow p-2 flex items-center justify-center cursor-move hover:shadow-lg transition-shadow"
+                  key={opt.id}
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, opt)}
+                  onDragOver={handleDragOver}
+                  onDrop={(e) => handleDrop(e, idx)}
+                  className="relative flex h-24 w-24 cursor-move items-center justify-center rounded-lg border border-border bg-card p-2 shadow-[0_1px_4px_rgba(26,31,54,0.04)] transition-shadow hover:shadow-md"
                 >
-                    <button
-                    className="absolute top-1 right-1 text-red-400 hover:text-red-600"
+                  <button
+                    type="button"
+                    className="absolute right-1 top-1 text-muted-foreground hover:text-destructive"
                     onClick={() => removeFromRanking(opt.id)}
-                    >
+                  >
                     ✕
-                    </button>
+                  </button>
+                  {opt.imageUrl ? (
                     <img
-                    src={opt.imageUrl}
-                    alt={opt.title}
-                    className="h-20 w-20 object-contain"
+                      src={opt.imageUrl}
+                      alt={opt.title}
+                      className="h-16 w-16 object-contain"
                     />
+                  ) : (
+                    <span className="px-1 text-center text-xs font-medium text-foreground">
+                      {opt.title}
+                    </span>
+                  )}
                 </div>
-                ) : (
+              ) : (
                 <div
-                    key={idx}
-                    onDragOver={handleDragOver}
-                    onDrop={(e) => handleDrop(e, idx)}
-                    className="h-24 w-24 border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center hover:border-blue-400 hover:bg-blue-50 transition-colors"
+                  key={idx}
+                  onDragOver={handleDragOver}
+                  onDrop={(e) => handleDrop(e, idx)}
+                  className="flex h-24 w-24 items-center justify-center rounded-lg border-2 border-dashed border-border transition-colors hover:border-primary/50 hover:bg-primary/5"
                 >
-                    <span className="text-gray-400 text-sm">Drop here</span>
+                  <span className="text-xs text-muted-foreground">Drop</span>
                 </div>
-                );
+              );
             })}
-            </div>
-        </div>
-            
-            
-            <div className="grid grid-cols-2 gap-y-4">
-                {options.filter(opt => !ranking.find(rankedOpt => rankedOpt.id === opt.id)).map((opt) => (
-                <div 
-                    key={opt.id}
-                    draggable
-                    onDragStart={(e) => handleDragStart(e, opt)}
-                    className="w-[200px] h-[200px] cursor-move hover:opacity-75 transition-opacity"
-                >
-                    <OptionCard option={opt} onDelete={() => {}} />
-                </div>
-            ))}
-            </div>
+          </div>
         </div>
 
-    
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {options.filter(opt => !ranking.find(rankedOpt => rankedOpt.id === opt.id)).map((opt) => (
+            <div
+              key={opt.id}
+              draggable
+              onDragStart={(e) => handleDragStart(e, opt)}
+              className="cursor-move transition-opacity hover:opacity-80"
+            >
+              <OptionCard option={opt} onDelete={undefined} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
   )
 }
 

@@ -1,6 +1,7 @@
-
 import { useState } from "react";
 import OptionCard from "../optionCard";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 type PollOption = {
   id: string;
@@ -14,7 +15,6 @@ type MultiVoteCardProps = {
   pollId: string;
   setVoted: (voted: boolean) => void;
 };
-
 
 function YesNoVoteCard ({options, pollId, setVoted}: MultiVoteCardProps) {
   const [votes, setVotes] = useState<Record<string, 'yes' | 'no' | 'maybe'>>({});
@@ -56,62 +56,65 @@ function YesNoVoteCard ({options, pollId, setVoted}: MultiVoteCardProps) {
     }
   }
 
-return(
-<div className="space-y-5">
-  {options.map((opt) => (
-    <div className="grid grid-cols-2 gap border-b" key={opt.id}>
-      {/* Left column: Option Card */}
-      <div className="flex justify-center items-center">
-        <OptionCard option={opt} onDelete={() => {}}/>
-      </div>
+  return(
+    <div className="space-y-6">
+      {options.map((opt) => (
+        <div
+          className="grid grid-cols-1 gap-6 border-b border-border pb-6 last:border-0 sm:grid-cols-2"
+          key={opt.id}
+        >
+          <div className="flex items-center justify-center">
+            <OptionCard option={opt} onDelete={undefined} />
+          </div>
 
-      {/* Right column: Voting buttons */}
-      <div className="flex flex-col justify-center items-center gap-4 mb-5">
-        <button 
-          className={`text-lg font-bold w-[120px] h-[60px] rounded-2xl border-3 ${
-            votes[opt.id] === 'yes' 
-              ? 'bg-green-500 border-green-700 text-white' 
-              : 'bg-green-300 border-green-500 hover:bg-green-400'
-          }`}
-          onClick={() => handleVoteSelection(opt.id, 'yes')}
-        >
-          YES
-        </button>
-        <button 
-          className={`text-lg font-bold w-[120px] h-[60px] rounded-2xl border-3 ${
-            votes[opt.id] === 'no' 
-              ? 'bg-red-500 border-red-700 text-white' 
-              : 'bg-red-300 border-red-500 hover:bg-red-400'
-          }`}
-          onClick={() => handleVoteSelection(opt.id, 'no')}
-        >
-          NO
-        </button>
-        <button 
-          className={`text-lg font-bold w-[120px] h-[60px] rounded-2xl border-3 ${
-            votes[opt.id] === 'maybe' 
-              ? 'bg-blue-500 border-blue-700 text-white' 
-              : 'bg-blue-300 border-blue-500 hover:bg-blue-400'
-          }`}
-          onClick={() => handleVoteSelection(opt.id, 'maybe')}
-        >
-          MAYBE
-        </button>
+          <div className="flex flex-col items-center justify-center gap-3">
+            <button
+              type="button"
+              className={cn(
+                "h-12 w-32 rounded-[6px] border text-sm font-semibold transition-colors",
+                votes[opt.id] === 'yes'
+                  ? "border-emerald-600 bg-emerald-500 text-white"
+                  : "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+              )}
+              onClick={() => handleVoteSelection(opt.id, 'yes')}
+            >
+              Yes
+            </button>
+            <button
+              type="button"
+              className={cn(
+                "h-12 w-32 rounded-[6px] border text-sm font-semibold transition-colors",
+                votes[opt.id] === 'no'
+                  ? "border-red-600 bg-red-500 text-white"
+                  : "border-red-200 bg-red-50 text-red-700 hover:bg-red-100"
+              )}
+              onClick={() => handleVoteSelection(opt.id, 'no')}
+            >
+              No
+            </button>
+            <button
+              type="button"
+              className={cn(
+                "h-12 w-32 rounded-[6px] border text-sm font-semibold transition-colors",
+                votes[opt.id] === 'maybe'
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-secondary text-muted-foreground hover:border-primary/40 hover:text-foreground"
+              )}
+              onClick={() => handleVoteSelection(opt.id, 'maybe')}
+            >
+              Maybe
+            </button>
+          </div>
+        </div>
+      ))}
+
+      <div className="flex justify-center pt-2">
+        <Button onClick={submitAllVotes}>
+          Submit all votes ({Object.keys(votes).length})
+        </Button>
       </div>
     </div>
-  ))}
-
-  <div className="flex justify-center mt-6">
-    <button
-      className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg text-lg"
-      onClick={submitAllVotes}
-    >
-      Submit All Votes ({Object.keys(votes).length})
-    </button>
-  </div>
-</div>
-)
-
+  )
 }
 
 export default YesNoVoteCard;

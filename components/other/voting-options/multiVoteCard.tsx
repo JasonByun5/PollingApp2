@@ -1,5 +1,7 @@
 import {useState} from "react";
 import OptionCard from "../optionCard";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 type PollOption = {
   id: string;
@@ -15,7 +17,6 @@ type MultiVoteCardProps = {
 };
 
 function MultiVoteCard ({options, pollId, setVoted}: MultiVoteCardProps) {
-
   const [selected, setSelected] = useState('');
 
   const submitPoll = async () => {
@@ -49,32 +50,35 @@ function MultiVoteCard ({options, pollId, setVoted}: MultiVoteCardProps) {
   }
 
   return(
-    <div className="grid grid-cols-2 gap-y-4">
-      {options.map((opt: PollOption) => (
-        <div 
-          key={opt.id}
-          className="group flex relative flex-col items-center"
-        >
-          <label>
-          <OptionCard option={opt} onDelete={() => {}} />
-            <input 
-              type="radio" 
-              name="vote" 
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {options.map((opt: PollOption) => (
+          <label
+            key={opt.id}
+            className={cn(
+              "relative flex cursor-pointer flex-col items-center rounded-lg transition-shadow",
+              selected === opt.id && "ring-2 ring-primary ring-offset-2"
+            )}
+          >
+            <OptionCard option={opt} onDelete={undefined} />
+            <input
+              type="radio"
+              name="vote"
               value={opt.id}
               checked={selected === opt.id}
               onChange={e => setSelected(e.target.value)}
+              className="mt-3 accent-primary"
             />
           </label>
-        </div>
-      ))}
+        ))}
+      </div>
 
-      <button
-        className="cursor-pointer"
-        onClick={submitPoll}
-      >Submit Vote</button>
+      <div className="flex justify-end">
+        <Button onClick={submitPoll}>
+          Submit vote
+        </Button>
+      </div>
     </div>
-
-    
   )
 }
 
