@@ -3,6 +3,8 @@
 import {useState, useRef, useEffect} from "react";
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { getImageValidationError } from '@/lib/uploads';
+import { POLL_TYPES, type PollType } from '@/lib/poll-types';
 import OptionCard from "../../../components/other/optionCard";
 
 
@@ -22,7 +24,7 @@ type User = {
 function NewPoll(){
   const [pollTitle, setPollTitle] = useState('');
   const [pollDescription, setPollDescription] = useState('');
-  const [pollType, setPollType] = useState('');
+  const [pollType, setPollType] = useState<PollType | ''>('');
   const [options, setOptions] = useState<PollOption[]>([]);
   const [currentOptionTitle, setCurrentOptionTitle] = useState('');
   const [currentOptionDesc, setCurrentOptionDesc] = useState('');
@@ -32,8 +34,8 @@ function NewPoll(){
   const [isSubmitting, setIsSubmitting] = useState(false);
   
 
-  const [activeType, setActiveType] = useState<string | null>(null);
-  const buttons = ['multi', 'yes/no', 'rank'];
+  const [activeType, setActiveType] = useState<PollType | null>(null);
+  const buttons = POLL_TYPES;
 
   //for the toast notif
   const [ alertMsg, setAlertMsg] = useState('');
@@ -94,6 +96,24 @@ function NewPoll(){
       fileInputRef.current.value = "";
     }
   } 
+
+  const handleImageSelected = (file: File | null) => {
+    if (!file) {
+      setCurrentOptionImage(null);
+      return;
+    }
+
+    const error = getImageValidationError(file);
+    if (error) {
+      ShowCustomAlert(error);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      return;
+    }
+
+    setCurrentOptionImage(file);
+  }
 
 
 
@@ -363,7 +383,7 @@ function NewPoll(){
                         type="file"  
                         ref={fileInputRef}
                         accept="image/*" 
-                        onChange={(e) => setCurrentOptionImage(e.target.files?.[0] || null)}
+                        onChange={(e) => handleImageSelected(e.target.files?.[0] || null)}
                         className='hidden'
                       />
                     </>

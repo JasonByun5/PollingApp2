@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { createPoll } from '@/lib/db/polls';
+import { isPollType } from '@/lib/poll-types';
+import { MAX_FILE_SIZE_BYTES, ALLOWED_IMAGE_TYPES } from '@/lib/uploads';
 
 
 // creates a new poll, based on form-data submission
@@ -24,6 +26,13 @@ export async function POST(request: NextRequest) {
     }
 
     const { title, description, type, options } = JSON.parse(payloadString);
+
+    if (!isPollType(type)) {
+      return NextResponse.json(
+        { error: 'Invalid poll type. Must be one of: multi, yes/no, rank' },
+        { status: 400 }
+      );
+    }
 
     // Generate a 6-digit poll ID (100000-999999)
     const generatePollId = () => {
@@ -52,16 +61,31 @@ export async function POST(request: NextRequest) {
       attempts++;
     }
 
+    // Validate all files up front so we fail fast, before uploading anything
+    // or creating the poll, if any image is too large or an unsupported type.
+    const submittedFiles = formData.getAll('files') as File[];
+    for (const file of submittedFiles) {
+      if (!file || file.size === 0) continue;
+      if (file.size > MAX_FILE_SIZE_BYTES) {
+        return NextResponse.json({ error: 'One of the images is too large (max 5MB)' }, { status: 400 });
+      }
+      if (!ALLOWED_IMAGE_TYPES[file.type]) {
+        return NextResponse.json({ error: 'One of the files is not a supported image type (png, jpg, gif, webp)' }, { status: 400 });
+      }
+    }
+
     // Handle file uploads to Supabase Storage
     const pollOptions = await Promise.all(
       options.map(async (option: any, idx: number) => {
         let imageUrl = '';
         
-        const file = formData.getAll('files')[idx] as File;
+        const file = submittedFiles[idx];
 
         if (file && file.size > 0) {
-          // Upload to Supabase Storage
-          const fileName = `poll-${pollId}-${idx}-${file.name}`;
+          // Filename is generated server-side (never from the user-supplied
+          // file.name) to avoid unsafe characters/path segments in the storage key.
+          const extension = ALLOWED_IMAGE_TYPES[file.type];
+          const fileName = `poll-${pollId}-${idx}-${crypto.randomUUID()}.${extension}`;
           const { error: uploadError } = await serviceSupabase.storage
             .from('poll-images')
             .upload(fileName, file);
