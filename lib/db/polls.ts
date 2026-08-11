@@ -40,27 +40,54 @@ export interface Vote {
   created_at: string;
 }
 
+const POLL_ID_MAX_ATTEMPTS = 8;
+
+function generatePollId() {
+  return Math.floor(Math.random() * 900000) + 100000;
+}
+
+function isUniqueViolation(error: { code?: string } | null | undefined) {
+  // Postgres unique_violation — surfaced by PostgREST/Supabase as code 23505
+  return error?.code === '23505';
+}
+
 export async function createPoll(
-  pollData: Omit<Poll, 'id' | 'created_at'>, 
+  pollData: Omit<Poll, 'id' | 'poll_id' | 'created_at'>,
   options: Omit<PollOption, 'id' | 'poll_id' | 'created_at'>[]
 ) {
   const supabase = createServiceClient(); // Use service client to bypass RLS
-  
-  // First, create the poll
-  const { data: poll, error: pollError } = await supabase
-    .from('polls')
-    .insert({
-      poll_id: pollData.poll_id,
-      author: pollData.author,
-      title: pollData.title,
-      description: pollData.description,
-      type: pollData.type,
-      created_at: new Date().toISOString()
-    })
-    .select()
-    .single();
 
-  if (pollError) throw pollError;
+  // Allocate poll_id by attempting insert and retrying on unique conflicts.
+  // Check-then-insert races under concurrent creates; the DB unique constraint
+  // is the source of truth.
+  let poll: Poll | null = null;
+  for (let attempt = 0; attempt < POLL_ID_MAX_ATTEMPTS; attempt++) {
+    const pollId = generatePollId();
+    const { data, error: pollError } = await supabase
+      .from('polls')
+      .insert({
+        poll_id: pollId,
+        author: pollData.author,
+        title: pollData.title,
+        description: pollData.description,
+        type: pollData.type,
+        created_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
+
+    if (!pollError && data) {
+      poll = data;
+      break;
+    }
+    if (!isUniqueViolation(pollError)) {
+      throw pollError;
+    }
+  }
+
+  if (!poll) {
+    throw new Error('Could not allocate a unique poll ID');
+  }
 
   // Then, create the poll options
   const pollOptions = options.map(option => ({
@@ -86,19 +113,56 @@ export async function createPoll(
   return { poll, options: createdOptions };
 }
 
-export async function getAllPolls(): Promise<PollWithOptions[]> {
+export const DEFAULT_PAGE_SIZE = 20;
+export const MAX_PAGE_SIZE = 50;
+
+export type PollListParams = {
+  limit?: number;
+  offset?: number;
+};
+
+export type PollListResult = {
+  polls: PollWithOptions[];
+  limit: number;
+  offset: number;
+  hasMore: boolean;
+};
+
+function normalizePagination(params?: PollListParams) {
+  const offset = Math.max(0, Math.floor(params?.offset ?? 0));
+  let limit = params?.limit ?? DEFAULT_PAGE_SIZE;
+  if (!Number.isFinite(limit) || limit < 1) {
+    limit = DEFAULT_PAGE_SIZE;
+  }
+  limit = Math.min(Math.floor(limit), MAX_PAGE_SIZE);
+  return { limit, offset };
+}
+
+export async function getAllPolls(params?: PollListParams): Promise<PollListResult> {
   const supabase = createServiceClient();
-  
+  const { limit, offset } = normalizePagination(params);
+
+  // Fetch one extra row to detect whether another page exists.
   const { data: polls, error: pollsError } = await supabase
     .from('polls')
     .select(`
       *,
       poll_options (*)
     `)
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .range(offset, offset + limit);
 
   if (pollsError) throw pollsError;
-  return polls || [];
+
+  const rows = polls || [];
+  const hasMore = rows.length > limit;
+
+  return {
+    polls: hasMore ? rows.slice(0, limit) : rows,
+    limit,
+    offset,
+    hasMore,
+  };
 }
 
 export async function getPollById(pollId: number): Promise<PollWithOptions> {
@@ -117,9 +181,13 @@ export async function getPollById(pollId: number): Promise<PollWithOptions> {
   return poll;
 }
 
-export async function getPollsByAuthor(author: string): Promise<PollWithOptions[]> {
+export async function getPollsByAuthor(
+  author: string,
+  params?: PollListParams
+): Promise<PollListResult> {
   const supabase = createServiceClient();
-  
+  const { limit, offset } = normalizePagination(params);
+
   const { data: polls, error } = await supabase
     .from('polls')
     .select(`
@@ -127,10 +195,20 @@ export async function getPollsByAuthor(author: string): Promise<PollWithOptions[
       poll_options (*)
     `)
     .eq('author', author)
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .range(offset, offset + limit);
 
   if (error) throw error;
-  return polls || [];
+
+  const rows = polls || [];
+  const hasMore = rows.length > limit;
+
+  return {
+    polls: hasMore ? rows.slice(0, limit) : rows,
+    limit,
+    offset,
+    hasMore,
+  };
 }
 
 export async function updatePollVotes(pollId: number, optionId: string, userId?: string, voteType?: 'yes' | 'no' | 'maybe') {

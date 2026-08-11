@@ -39,33 +39,6 @@ export async function POST(request: NextRequest) {
 
     const { title, description, type, options } = validation.data;
 
-    // Generate a 6-digit poll ID (100000-999999)
-    const generatePollId = () => {
-      return Math.floor(Math.random() * 900000) + 100000;
-    };
-
-    let pollId = generatePollId();
-    
-    // Check if poll ID already exists and regenerate if needed
-    const { data: existingPoll } = await supabase
-      .from('polls')
-      .select('poll_id')
-      .eq('poll_id', pollId)
-      .single();
-    
-    // If poll ID exists, try a few more times
-    let attempts = 0;
-    while (existingPoll && attempts < 5) {
-      pollId = generatePollId();
-      const { data: checkAgain } = await supabase
-        .from('polls')
-        .select('poll_id')
-        .eq('poll_id', pollId)
-        .single();
-      if (!checkAgain) break;
-      attempts++;
-    }
-
     // Validate all files up front so we fail fast, before uploading anything
     // or creating the poll, if any image is too large or an unsupported type.
     const submittedFiles = formData.getAll('files') as File[];
@@ -79,7 +52,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Handle file uploads to Supabase Storage
+    // Upload files before insert. Storage keys use a UUID only — poll_id is
+    // allocated inside createPoll on successful insert (with conflict retries).
     const pollOptions = await Promise.all(
       options.map(async (option, idx) => {
         let imageUrl = '';
@@ -90,7 +64,7 @@ export async function POST(request: NextRequest) {
           // Filename is generated server-side (never from the user-supplied
           // file.name) to avoid unsafe characters/path segments in the storage key.
           const extension = ALLOWED_IMAGE_TYPES[file.type];
-          const fileName = `poll-${pollId}-${idx}-${crypto.randomUUID()}.${extension}`;
+          const fileName = `poll-${crypto.randomUUID()}.${extension}`;
           const { error: uploadError } = await serviceSupabase.storage
             .from('poll-images')
             .upload(fileName, file);
@@ -115,16 +89,15 @@ export async function POST(request: NextRequest) {
       })
     );
 
-    // Create poll and options using the new database structure
-    const pollData = {
-      poll_id: pollId,
-      author: user.id,
-      title,
-      description,
-      type,
-    };
-
-    const result = await createPoll(pollData, pollOptions);
+    const result = await createPoll(
+      {
+        author: user.id,
+        title,
+        description,
+        type,
+      },
+      pollOptions
+    );
 
     return NextResponse.json({ pollId: result.poll.poll_id, ...result }, { status: 201 });
 
