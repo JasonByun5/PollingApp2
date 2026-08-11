@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import MultiVoteCard from "../../../../components/other/voting-options/multiVoteCard";
 import YesNoVoteCard from "../../../../components/other/voting-options/yesNoVoteCard";
 import RankVoteCard from "../../../../components/other/voting-options/rankVoteCard";
+import type { PollType } from "@/lib/poll-types";
 
 // Force dynamic rendering to avoid prerendering issues with dynamic routes
 export const dynamic = 'force-dynamic';
@@ -26,7 +27,7 @@ interface Poll {
   author: string;
   title: string;
   description?: string;
-  type: string;
+  type: PollType;
   poll_options: PollOption[];
   created_at: string;
 }
@@ -103,12 +104,12 @@ export default function PollVote() {
           )}
 
                     
-          {poll.type == "yes/no" && (
+          {poll.type === "yes/no" && (
             <YesNoVoteCard options={poll.poll_options} pollId={pollId} setVoted={setVoted}/>
           )}
 
 
-          {poll.type == "rank" && (
+          {poll.type === "rank" && (
               <RankVoteCard options={poll.poll_options} pollId={pollId} setVoted={setVoted} />
           )}
 

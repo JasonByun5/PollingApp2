@@ -170,8 +170,6 @@ function NewPoll(){
 
     setIsSubmitting(true); // Start loading
 
-    console.log(user)
-
     if (!user) {
       ShowCustomAlert("User not authenticated.");
       setIsSubmitting(false);
@@ -231,12 +229,6 @@ function NewPoll(){
       setIsSubmitting(false); // Stop loading regardless of success/failure
     }
   }
-
-  //take out when deployed
-  useEffect(() => {
-    console.log("Options updated:", options);
-  }, [options]);
-  
 
   if (isLoading) {
     return (

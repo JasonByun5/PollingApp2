@@ -1,4 +1,8 @@
 import { createClient, createServiceClient } from '@/lib/supabase/server';
+import type { PollType } from '@/lib/poll-types';
+
+export type { PollType } from '@/lib/poll-types';
+export { POLL_TYPES, isPollType } from '@/lib/poll-types';
 
 export interface PollOption {
   id: string;
@@ -19,7 +23,7 @@ export interface Poll {
   author: string;
   title: string;
   description: string;
-  type: string;
+  type: PollType;
   created_at: string;
 }
 

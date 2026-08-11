@@ -13,10 +13,6 @@ export async function GET(
 ) {
   try {
     const resolvedParams = await params;
-    
-    console.log('Full params object:', resolvedParams);
-    console.log('Raw pollId:', resolvedParams.pollId, 'Type:', typeof resolvedParams.pollId);
-    
     const pollIdStr = resolvedParams.pollId;
     if (!pollIdStr || pollIdStr === 'undefined') {
       return NextResponse.json({ error: 'Invalid poll ID' }, { status: 400 });
@@ -31,11 +27,7 @@ export async function GET(
       }, { status: 400 });
     }
     
-    console.log('Searching for poll_id:', pollIdNum, 'from string:', pollIdStr);
-    
     const poll = await getPollById(pollIdNum);
-
-    console.log('Found poll:', poll?.title);
     return NextResponse.json(poll);
   } catch (err) {
     console.error('Error fetching poll:', err);

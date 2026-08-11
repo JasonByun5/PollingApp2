@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useParams } from "next/navigation";
 import { createClient } from '@/lib/supabase/client';
 import { isAdminUser } from '@/lib/utils';
+import type { PollType } from '@/lib/poll-types';
 
 // Force dynamic rendering to avoid prerendering issues with dynamic routes
 export const dynamic = 'force-dynamic';
@@ -28,7 +29,7 @@ interface Poll {
   author: string;
   title: string;
   description: string;
-  type: string;
+  type: PollType;
   poll_options: PollOption[];
   created_at: string;
 }

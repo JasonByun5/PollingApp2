@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/server';
 import { createPoll } from '@/lib/db/polls';
-import { isPollType } from '@/lib/poll-types';
+import { validateCreatePollPayload } from '@/lib/poll-validation';
 import { MAX_FILE_SIZE_BYTES, ALLOWED_IMAGE_TYPES } from '@/lib/uploads';
 
 
@@ -19,20 +19,25 @@ export async function POST(request: NextRequest) {
 
     // Parse form data
     const formData = await request.formData();
-    const payloadString = formData.get('payload') as string;
-    
-    if (!payloadString) {
+    const payloadString = formData.get('payload');
+
+    if (typeof payloadString !== 'string' || !payloadString) {
       return NextResponse.json({ error: 'Missing payload in form-data' }, { status: 400 });
     }
 
-    const { title, description, type, options } = JSON.parse(payloadString);
-
-    if (!isPollType(type)) {
-      return NextResponse.json(
-        { error: 'Invalid poll type. Must be one of: multi, yes/no, rank' },
-        { status: 400 }
-      );
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(payloadString);
+    } catch {
+      return NextResponse.json({ error: 'Invalid JSON payload' }, { status: 400 });
     }
+
+    const validation = validateCreatePollPayload(parsed);
+    if (!validation.ok) {
+      return NextResponse.json({ error: validation.error }, { status: 400 });
+    }
+
+    const { title, description, type, options } = validation.data;
 
     // Generate a 6-digit poll ID (100000-999999)
     const generatePollId = () => {
@@ -76,7 +81,7 @@ export async function POST(request: NextRequest) {
 
     // Handle file uploads to Supabase Storage
     const pollOptions = await Promise.all(
-      options.map(async (option: any, idx: number) => {
+      options.map(async (option, idx) => {
         let imageUrl = '';
         
         const file = submittedFiles[idx];
@@ -115,7 +120,7 @@ export async function POST(request: NextRequest) {
       poll_id: pollId,
       author: user.id,
       title,
-      description: description,
+      description,
       type,
     };
 

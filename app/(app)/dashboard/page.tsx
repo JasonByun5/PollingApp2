@@ -3,6 +3,7 @@
 import {useState, useRef, useEffect} from "react";
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import type { PollType } from '@/lib/poll-types';
 
 type User = {
   id: string;
@@ -12,7 +13,7 @@ type User = {
 type Poll = {
   title: string;
   poll_id: string;
-  type: string;
+  type: PollType;
   created_at: string;
 };
 
@@ -43,14 +44,9 @@ function ViewPoll () {
   }, []);
   
   useEffect(() => {
-
-    console.log(user)
-    
     if (!user) return;
 
     const fetchUserPolls = async () => {
-
-        //`http://localhost:5000/api/polls/by-user?userId=${user._id}`
         try{
         const res = await fetch(`/api/polls/by-author/${user.id}`, {
             method:"GET",
@@ -61,7 +57,6 @@ function ViewPoll () {
         }
           
         const data = await res.json();
-        console.log("User's polls:", data);
         setPolls(data);
 
       } catch (err) {
