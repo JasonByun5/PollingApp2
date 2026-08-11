@@ -107,7 +107,7 @@ function ViewPoll () {
                <button 
                   type="submit" 
                   className="bg-red-200 rounded-full text-xl"
-                  onClick={() => router.push(`/polls/${poll.poll_id}/view`)}
+                  onClick={() => router.push(`/dashboard/polls/${poll.poll_id}`)}
                 >📊</button>
             </div>
           ))}

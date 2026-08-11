@@ -47,6 +47,10 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const user = data?.claims;
 
+  // "/polls/<id>" is the only thing that lives under "/polls" - the public
+  // vote page - so a plain prefix check is unambiguous here. The owner-only
+  // results/delete page lives under "/dashboard/polls/<id>" instead, which
+  // is NOT excluded below and therefore still requires a login.
   if (
     request.nextUrl.pathname !== "/" &&
     !user &&

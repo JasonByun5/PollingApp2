@@ -3,6 +3,8 @@
 import {useState, useRef, useEffect} from "react";
 import { useRouter } from 'next/navigation';
 import { useParams } from "next/navigation";
+import { createClient } from '@/lib/supabase/client';
+import { isAdminUser } from '@/lib/utils';
 
 // Force dynamic rendering to avoid prerendering issues with dynamic routes
 export const dynamic = 'force-dynamic';
@@ -42,13 +44,21 @@ function PollResult () {
   const [totalVotes, setTotalVote] = useState(0);
   const [deleted, setDeleted] = useState(false);
 
-  console.log({pollId})
-  //const [loading, setLoading] = useState(true);
-
   const [poll, setPoll] = useState<Poll | null>(null);
-    const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [canDelete, setCanDelete] = useState(false);
 
-
+  // Determine if the current viewer is the poll's owner or an admin,
+  // so the Delete button only ever shows for people who can actually use it.
+  useEffect(() => {
+    const checkPermissions = async () => {
+      if (!poll) return;
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      setCanDelete(!!user && (user.id === poll.author || isAdminUser(user)));
+    };
+    checkPermissions();
+  }, [poll]);
 
   useEffect(() => {
     setLoading(true);
@@ -227,11 +237,13 @@ function PollResult () {
 
 
 
-          <button
-            onClick={() => setDeleted(true)}
-          >
-            Delete Poll
-          </button>
+          {canDelete && (
+            <button
+              onClick={() => setDeleted(true)}
+            >
+              Delete Poll
+            </button>
+          )}
 
         </div>
       </div>
