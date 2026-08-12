@@ -7,8 +7,8 @@ import { createClient } from '@/lib/supabase/client';
 import { isAdminUser } from '@/lib/utils';
 import type { PollType } from '@/lib/poll-types';
 import { PageShell } from "@/components/page-shell";
+import { PollHeader } from "@/components/poll-header";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 
 export const dynamic = 'force-dynamic';
 
@@ -42,7 +42,10 @@ function PollResult () {
   const pollId = params.pollId as string;
 
   const [totalVotes, setTotalVote] = useState(0);
-  const [deleted, setDeleted] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [wasDeleted, setWasDeleted] = useState(false);
 
   const [poll, setPoll] = useState<Poll | null>(null);
   const [loading, setLoading] = useState(true);
@@ -93,27 +96,55 @@ function PollResult () {
 
   }, [pollId]);
 
-  const deletePoll = async () => {
-    try{
+  useEffect(() => {
+    if (!wasDeleted) return;
+    const timeout = window.setTimeout(() => {
+      router.push("/dashboard");
+    }, 1600);
+    return () => window.clearTimeout(timeout);
+  }, [wasDeleted, router]);
+
+  const handleConfirmDelete = async () => {
+    setIsDeleting(true);
+    setDeleteError(null);
+    try {
       const res = await fetch(`/api/polls/${pollId}`, {
-        method: 'DELETE'
+        method: "DELETE",
       });
 
-      if(!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-      setPoll(null)
-    } 
-    catch(err){
+      setShowDeleteConfirm(false);
+      setWasDeleted(true);
+    } catch (err) {
       console.error(err);
-      alert('Failed to delete poll.')
+      setDeleteError("Failed to delete poll. Please try again.");
+    } finally {
+      setIsDeleting(false);
     }
-  }
+  };
 
   if (loading) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center text-muted-foreground">
         Loading...
       </div>
+    );
+  }
+
+  if (wasDeleted) {
+    return (
+      <PageShell size="md">
+        <div className="space-y-4 text-center">
+          <h2 className="text-xl font-semibold text-foreground">Poll deleted</h2>
+          <p className="text-muted-foreground">
+            Taking you back to your dashboard…
+          </p>
+          <Button onClick={() => router.push("/dashboard")}>
+            Back to dashboard
+          </Button>
+        </div>
+      </PageShell>
     );
   }
 
@@ -127,32 +158,40 @@ function PollResult () {
 
   return(
     <div>
-      {deleted && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40">
+      {showDeleteConfirm && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-poll-title"
+        >
           <div className="w-80 space-y-4 rounded-xl border border-border bg-card p-6 text-center shadow-[0_8px_30px_rgba(26,31,54,0.12)]">
-            <h2 className="text-xl font-semibold text-foreground">Delete poll?</h2>
-            <p className="text-sm text-muted-foreground">This action cannot be undone.</p>
+            <h2 id="delete-poll-title" className="text-xl font-semibold text-foreground">
+              Delete poll?
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              This permanently removes the poll and its votes. This cannot be undone.
+            </p>
+            {deleteError && (
+              <p role="alert" className="text-sm text-destructive">
+                {deleteError}
+              </p>
+            )}
             <div className="flex justify-center gap-3">
               <Button
                 variant="destructive"
-                onClick={async () => {
-                  setDeleted(false);
-                  setLoading(true);
-                  try {
-                    await deletePoll();
-                    setTimeout(() => {
-                      router.push('/dashboard');
-                    }, 1000);
-                  } catch {
-                    router.push('/dashboard');
-                  }
-                }}
+                disabled={isDeleting}
+                onClick={handleConfirmDelete}
               >
-                Delete
+                {isDeleting ? "Deleting…" : "Delete"}
               </Button>
               <Button
                 variant="secondary"
-                onClick={() => setDeleted(false)}
+                disabled={isDeleting}
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  setDeleteError(null);
+                }}
               >
                 Cancel
               </Button>
@@ -162,29 +201,23 @@ function PollResult () {
       )}
 
       <PageShell size="xl">
-        <div className="mb-8 space-y-4 border-b border-border pb-6">
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-[28px]">
-              {poll.title}
-            </h1>
-            <Badge variant="secondary" className="font-normal">
-              {poll.type}
-            </Badge>
-          </div>
-          <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-muted-foreground">
-            <span>
-              Poll ID: <span className="font-mono text-foreground">{poll.poll_id}</span>
-            </span>
-            <span>
-              Total votes: <span className="font-medium text-foreground">{totalVotes}</span>
-            </span>
-          </div>
-          {poll.description && (
-            <p className="max-w-2xl text-[15px] leading-relaxed text-muted-foreground">
-              {poll.description}
-            </p>
-          )}
-        </div>
+        <PollHeader
+          title={poll.title}
+          type={poll.type}
+          description={poll.description}
+          meta={
+            <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-muted-foreground">
+              <span>
+                Poll ID:{" "}
+                <span className="font-mono text-foreground">{poll.poll_id}</span>
+              </span>
+              <span>
+                Total votes:{" "}
+                <span className="font-medium text-foreground">{totalVotes}</span>
+              </span>
+            </div>
+          }
+        />
 
         {poll.type === "multi" && (
           <>
@@ -265,7 +298,10 @@ function PollResult () {
           <div className="mt-8 flex justify-end border-t border-border pt-6">
             <Button
               variant="destructive"
-              onClick={() => setDeleted(true)}
+              onClick={() => {
+                setDeleteError(null);
+                setShowDeleteConfirm(true);
+              }}
             >
               Delete poll
             </Button>

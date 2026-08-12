@@ -1,11 +1,12 @@
 'use client';
 
-import {useState, useRef, useEffect} from "react";
+import {useState, useRef} from "react";
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
 import { getImageValidationError } from '@/lib/uploads';
 import { POLL_TYPES, type PollType } from '@/lib/poll-types';
 import OptionCard from "../../../components/other/optionCard";
+import { AuthGate } from "@/components/auth/auth-gate";
+import type { AuthUser } from "@/hooks/use-require-auth";
 import { PageShell, PageHeader } from "@/components/page-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,12 +21,7 @@ type PollOption = {
   file: File | null;
 };
 
-type User = {
-  id: string;
-  email: string;
-};
-
-function NewPoll(){
+function NewPoll({ user }: { user: AuthUser }){
   const [pollTitle, setPollTitle] = useState('');
   const [pollDescription, setPollDescription] = useState('');
   const [pollType, setPollType] = useState<PollType | ''>('');
@@ -33,8 +29,6 @@ function NewPoll(){
   const [currentOptionTitle, setCurrentOptionTitle] = useState('');
   const [currentOptionDesc, setCurrentOptionDesc] = useState('');
   const [currentOptionImage, setCurrentOptionImage] = useState<File | null>(null);
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [activeType, setActiveType] = useState<PollType | null>(null);
@@ -54,24 +48,6 @@ function NewPoll(){
   }
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      const supabase = createClient();
-      const { data } = await supabase.auth.getClaims();
-      const user = data?.claims;
-      
-      if (user) {
-        setUser({
-          id: user.sub,
-          email: user.email || ''
-        });
-      }
-      setIsLoading(false);
-    };
-    
-    checkAuth();
-  }, []);
 
   const handleRemoveOption = (index: number) => {
     setOptions(prev => prev.filter(opt => opt.index !== index));
@@ -163,12 +139,6 @@ function NewPoll(){
 
     setIsSubmitting(true);
 
-    if (!user) {
-      ShowCustomAlert("User not authenticated.");
-      setIsSubmitting(false);
-      return;
-    }
-
     const payload = {
       author: user.id,
       title: pollTitle,
@@ -219,28 +189,6 @@ function NewPoll(){
     } finally {
       setIsSubmitting(false);
     }
-  }
-
-  if (isLoading) {
-    return (
-      <div className="flex min-h-[50vh] items-center justify-center text-muted-foreground">
-        Loading...
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <PageShell size="md">
-        <div className="space-y-4 text-center">
-          <h2 className="text-xl font-semibold text-foreground">Authentication required</h2>
-          <p className="text-muted-foreground">You need to log in to create a new poll.</p>
-          <Button onClick={() => router.push('/login')}>
-            Go to Login
-          </Button>
-        </div>
-      </PageShell>
-    );
   }
 
   return(
@@ -428,4 +376,10 @@ function NewPoll(){
   )
 }
 
-export default NewPoll;
+export default function CreatePollPage() {
+  return (
+    <AuthGate description="You need to log in to create a new poll.">
+      {(user) => <NewPoll user={user} />}
+    </AuthGate>
+  );
+}

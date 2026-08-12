@@ -8,8 +8,8 @@ import YesNoVoteCard from "../../../../components/other/voting-options/yesNoVote
 import RankVoteCard from "../../../../components/other/voting-options/rankVoteCard";
 import type { PollType } from "@/lib/poll-types";
 import { PageShell } from "@/components/page-shell";
+import { PollHeader } from "@/components/poll-header";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 
 export const dynamic = 'force-dynamic';
 
@@ -95,21 +95,11 @@ export default function PollVote() {
       )}
 
       <PageShell size="lg">
-        <div className="mb-8 space-y-3 border-b border-border pb-6">
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-[28px]">
-              {poll.title}
-            </h1>
-            <Badge variant="secondary" className="font-normal">
-              {poll.type}
-            </Badge>
-          </div>
-          {poll.description && (
-            <p className="max-w-2xl text-[15px] leading-relaxed text-muted-foreground">
-              {poll.description}
-            </p>
-          )}
-        </div>
+        <PollHeader
+          title={poll.title}
+          type={poll.type}
+          description={poll.description}
+        />
 
         {poll.type === "multi" && (
           <MultiVoteCard options={poll.poll_options} pollId={pollId} setVoted={setVoted}/>

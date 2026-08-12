@@ -2,16 +2,12 @@
 
 import {useState, useEffect} from "react";
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
 import type { PollType } from '@/lib/poll-types';
+import { AuthGate } from "@/components/auth/auth-gate";
+import type { AuthUser } from "@/hooks/use-require-auth";
 import { PageShell, PageHeader } from "@/components/page-shell";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-
-type User = {
-  id: string;
-  email: string;
-};
 
 type Poll = {
   title: string;
@@ -22,36 +18,14 @@ type Poll = {
 
 const PAGE_SIZE = 20;
 
-function ViewPoll () {
-  const [user, setUser] = useState<User | null>(null);
+function DashboardPolls({ user }: { user: AuthUser }) {
   const [polls, setPolls] = useState<Poll[]>([]);
   const [hasMore, setHasMore] = useState(false);
   const [offset, setOffset] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const supabase = createClient();
-      const { data } = await supabase.auth.getClaims();
-      const user = data?.claims;
-      
-      if (user) {
-        setUser({
-          id: user.sub,
-          email: user.email || ''
-        });
-      }
-      setIsLoading(false);
-    };
-    
-    checkAuth();
-  }, []);
-  
-  useEffect(() => {
-    if (!user) return;
-
     const fetchUserPolls = async () => {
       try {
         const res = await fetch(
@@ -72,10 +46,10 @@ function ViewPoll () {
     };
 
     fetchUserPolls();
-  }, [user]);
+  }, [user.id]);
 
   const handleLoadMore = async () => {
-    if (!user || isLoadingMore || !hasMore) return;
+    if (isLoadingMore || !hasMore) return;
 
     setIsLoadingMore(true);
     try {
@@ -97,28 +71,6 @@ function ViewPoll () {
       setIsLoadingMore(false);
     }
   };
-
-  if (isLoading) {
-    return (
-      <div className="flex min-h-[50vh] items-center justify-center text-muted-foreground">
-        Loading...
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <PageShell size="md">
-        <div className="space-y-4 text-center">
-          <h2 className="text-xl font-semibold text-foreground">Not logged in</h2>
-          <p className="text-muted-foreground">Sign in to view your polls.</p>
-          <Button onClick={() => router.push('/login')}>
-            Go to Login
-          </Button>
-        </div>
-      </PageShell>
-    );
-  }
 
   return (
     <PageShell size="xl">
@@ -198,4 +150,10 @@ function ViewPoll () {
   );
 }
 
-export default ViewPoll;
+export default function ViewPoll() {
+  return (
+    <AuthGate description="Sign in to view your polls.">
+      {(user) => <DashboardPolls user={user} />}
+    </AuthGate>
+  );
+}
