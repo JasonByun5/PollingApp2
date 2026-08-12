@@ -6,6 +6,7 @@ import type { PollType } from '@/lib/poll-types';
 import { AuthGate } from "@/components/auth/auth-gate";
 import type { AuthUser } from "@/hooks/use-require-auth";
 import { PageShell, PageHeader } from "@/components/page-shell";
+import { EmptyState } from "@/components/empty-state";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -86,12 +87,16 @@ function DashboardPolls({ user }: { user: AuthUser }) {
       />
 
       {polls.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-border px-6 py-12 text-center">
-          <p className="text-muted-foreground">No polls yet.</p>
-          <Button className="mt-4" onClick={() => router.push('/create')}>
-            Create your first poll
-          </Button>
-        </div>
+        <EmptyState
+          variant="dashed"
+          title="No polls yet"
+          description="Create your first poll to see it listed here."
+          action={
+            <Button onClick={() => router.push("/create")}>
+              Create your first poll
+            </Button>
+          }
+        />
       ) : (
         <div className="overflow-hidden rounded-lg border border-border">
           <div className="hidden grid-cols-[1.5fr_1fr_0.8fr_0.8fr_auto] gap-4 border-b border-border bg-secondary/60 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground sm:grid">

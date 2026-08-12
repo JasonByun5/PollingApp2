@@ -8,7 +8,9 @@ import { isAdminUser } from '@/lib/utils';
 import type { PollType } from '@/lib/poll-types';
 import { PageShell } from "@/components/page-shell";
 import { PollHeader } from "@/components/poll-header";
+import { PageEmptyState } from "@/components/empty-state";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export const dynamic = 'force-dynamic';
 
@@ -150,9 +152,15 @@ function PollResult () {
 
   if (!poll) {
     return (
-      <PageShell size="md">
-        <p className="text-center text-muted-foreground">Poll not found.</p>
-      </PageShell>
+      <PageEmptyState
+        title="Poll not found"
+        description="This poll may have been deleted, or the ID doesn’t match anything you can view."
+        action={
+          <Button asChild>
+            <Link href="/dashboard">Back to dashboard</Link>
+          </Button>
+        }
+      />
     );
   }
 

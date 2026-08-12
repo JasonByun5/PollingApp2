@@ -9,7 +9,9 @@ import RankVoteCard from "../../../../components/other/voting-options/rankVoteCa
 import type { PollType } from "@/lib/poll-types";
 import { PageShell } from "@/components/page-shell";
 import { PollHeader } from "@/components/poll-header";
+import { PageEmptyState } from "@/components/empty-state";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export const dynamic = 'force-dynamic';
 
@@ -65,11 +67,25 @@ export default function PollVote() {
 
   }, [pollId]);
 
-  if (loading || !poll) {
+  if (loading) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center text-muted-foreground">
         Loading...
       </div>
+    );
+  }
+
+  if (!poll) {
+    return (
+      <PageEmptyState
+        title="Poll not found"
+        description="That code doesn’t match an existing poll. Double-check the number, or head home to try again."
+        action={
+          <Button asChild>
+            <Link href="/">Back home</Link>
+          </Button>
+        }
+      />
     );
   }
 
