@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useParams } from "next/navigation";
 import { createClient } from '@/lib/supabase/client';
 import { isAdminUser } from '@/lib/utils';
-import type { PollType } from '@/lib/poll-types';
+import type { PollOption, PollWithOptions } from '@/lib/types';
 import { PageShell } from "@/components/page-shell";
 import { PollHeader } from "@/components/poll-header";
 import { PageEmptyState } from "@/components/empty-state";
@@ -14,30 +14,6 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 export const dynamic = 'force-dynamic';
-
-interface PollOption {
-  id: string;
-  poll_id: number;
-  title: string;
-  description: string;
-  vote_count: number;
-  yes_votes?: number;
-  no_votes?: number;
-  maybe_votes?: number;
-  image_url: string;
-  created_at: string;
-}
-
-interface Poll {
-  id: string;
-  poll_id: number;
-  author: string;
-  title: string;
-  description: string;
-  type: PollType;
-  poll_options: PollOption[];
-  created_at: string;
-}
 
 function PollResult () {
   const router = useRouter();
@@ -50,7 +26,7 @@ function PollResult () {
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [wasDeleted, setWasDeleted] = useState(false);
 
-  const [poll, setPoll] = useState<Poll | null>(null);
+  const [poll, setPoll] = useState<PollWithOptions | null>(null);
   const [loading, setLoading] = useState(true);
   const [canDelete, setCanDelete] = useState(false);
 

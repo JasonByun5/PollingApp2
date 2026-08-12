@@ -43,7 +43,11 @@ npm install
 
 ### 3. Set environment variables
 
-Create a `.env.local` file in the project root:
+Copy the example env file and fill in values from your Supabase project:
+
+```bash
+cp .env.example .env.local
+```
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
@@ -113,12 +117,20 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Scripts
 
-| Command         | Description              |
-|-----------------|--------------------------|
-| `npm run dev`   | Start local dev server   |
-| `npm run build` | Create production build  |
-| `npm run start` | Run production server    |
-| `npm run lint`  | Run ESLint               |
+| Command            | Description                                      |
+|--------------------|--------------------------------------------------|
+| `npm run dev`      | Start local dev server                           |
+| `npm run build`    | Create production build                          |
+| `npm run start`    | Run production server                            |
+| `npm run lint`     | Run ESLint                                       |
+| `npm run typecheck`| TypeScript check (`tsc --noEmit`)                |
+| `npm test`         | Run Vitest unit tests                            |
+| `npm run test:e2e` | Run Playwright e2e (optional; needs env / URL)   |
+
+### Tests
+
+- **Unit (Vitest):** run with `npm test`. These cover create-poll validation and image upload checks and run in CI.
+- **E2E (Playwright):** optional for now. With the app running locally (and `.env.local` filled), run `npm run test:e2e`. Or point at a deployed app with `PLAYWRIGHT_BASE_URL=https://… npm run test:e2e`. Without those env vars, e2e tests skip so CI stays green without secrets.
 
 ## Future Improvements
 

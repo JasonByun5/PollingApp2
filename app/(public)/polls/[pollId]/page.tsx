@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import MultiVoteCard from "../../../../components/other/voting-options/multiVoteCard";
 import YesNoVoteCard from "../../../../components/other/voting-options/yesNoVoteCard";
 import RankVoteCard from "../../../../components/other/voting-options/rankVoteCard";
-import type { PollType } from "@/lib/poll-types";
+import type { PollWithOptions } from "@/lib/types";
 import { PageShell } from "@/components/page-shell";
 import { PollHeader } from "@/components/poll-header";
 import { PageEmptyState } from "@/components/empty-state";
@@ -16,31 +16,10 @@ import Link from "next/link";
 
 export const dynamic = 'force-dynamic';
 
-interface PollOption {
-  id: string;
-  poll_id: number;
-  title: string;
-  description?: string;
-  vote_count: number;
-  image_url?: string;
-  created_at: string;
-}
-
-interface Poll {
-  id: string;
-  poll_id: number;
-  author: string;
-  title: string;
-  description?: string;
-  type: PollType;
-  poll_options: PollOption[];
-  created_at: string;
-}
-
 export default function PollVote() {
   const params = useParams();
   const pollId = params.pollId as string;
-  const [poll, setPoll] = useState<Poll | null>(null);
+  const [poll, setPoll] = useState<PollWithOptions | null>(null);
   const [loading, setLoading] = useState(true);
 
   const [voted, setVoted] = useState(false);
