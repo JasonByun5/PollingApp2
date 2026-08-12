@@ -1,6 +1,7 @@
 'use client';
 
 import { AuthButton } from "@/components/auth/auth-button";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Suspense } from "react";
 import { useRouter } from "next/navigation";
 
@@ -17,9 +18,12 @@ export function Header() {
         >
           Pollify
         </button>
-        <Suspense fallback={<div className="h-8 w-24 animate-pulse rounded-md bg-muted" />}>
-          <AuthButton />
-        </Suspense>
+        <div className="flex items-center gap-1 sm:gap-2">
+          <ThemeToggle />
+          <Suspense fallback={<div className="h-8 w-24 animate-pulse rounded-md bg-muted" />}>
+            <AuthButton />
+          </Suspense>
+        </div>
       </nav>
     </header>
   );
