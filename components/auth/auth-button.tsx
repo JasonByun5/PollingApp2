@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Button } from "../ui/button";
+import { Skeleton } from "../ui/skeleton";
 import { createClient } from "@/lib/supabase/client";
 import { LogoutButton } from "./logout-button";
 import { useEffect, useState } from "react";
@@ -29,7 +30,7 @@ export function AuthButton() {
   }, [supabase.auth]);
 
   if (loading) {
-    return <div className="h-8 w-24 animate-pulse rounded-md bg-muted" />;
+    return <Skeleton className="h-8 w-24" aria-hidden="true" />;
   }
 
   return user ? (

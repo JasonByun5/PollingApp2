@@ -9,6 +9,7 @@ import type { PollType } from '@/lib/poll-types';
 import { PageShell } from "@/components/page-shell";
 import { PollHeader } from "@/components/poll-header";
 import { PageEmptyState } from "@/components/empty-state";
+import { PollPageSkeleton } from "@/components/loading-skeletons";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
@@ -127,11 +128,7 @@ function PollResult () {
   };
 
   if (loading) {
-    return (
-      <div className="flex min-h-[50vh] items-center justify-center text-muted-foreground">
-        Loading...
-      </div>
-    );
+    return <PollPageSkeleton size="xl" />;
   }
 
   if (wasDeleted) {
@@ -220,18 +217,18 @@ function PollResult () {
                 <span className="font-mono text-foreground">{poll.poll_id}</span>
               </span>
               <span>
-                Total votes:{" "}
+                {poll.type === "rank" ? "Total points" : "Total votes"}:{" "}
                 <span className="font-medium text-foreground">{totalVotes}</span>
               </span>
             </div>
           }
         />
 
-        {poll.type === "multi" && (
+        {(poll.type === "multi" || poll.type === "rank") && (
           <>
             <div className="mb-3 hidden grid-cols-3 gap-4 border-b border-border px-3 pb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground sm:grid">
               <p>Option</p>
-              <p className="text-center">Votes</p>
+              <p className="text-center">{poll.type === "rank" ? "Points" : "Votes"}</p>
               <p className="text-center">Percentage</p>
             </div>
             {Array.isArray(poll.poll_options) && poll.poll_options.map((opt) => { 

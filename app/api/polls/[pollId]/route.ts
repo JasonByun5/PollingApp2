@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getPollById, deletePoll, updatePollVotes, hasUserVoted } from '@/lib/db/polls';
+import { getPollById, deletePoll, updatePollVotes, updateRankVotes, hasUserVoted } from '@/lib/db/polls';
 import { createClient } from '@/lib/supabase/server';
 import { isAdminUser } from '@/lib/utils';
 
@@ -67,8 +67,32 @@ export async function PATCH(
 
     let response: NextResponse;
 
-    // Handle single vote (for multi/rank polls)
-    if (body.optionId) {
+    // Handle ranked ballot (ordered option IDs, best → worst)
+    if (Array.isArray(body.ranking)) {
+      const ranking = body.ranking as unknown[];
+      if (ranking.length === 0) {
+        return NextResponse.json({ error: 'Ranking is required' }, { status: 400 });
+      }
+      if (!ranking.every((id) => typeof id === 'string' && id.length > 0)) {
+        return NextResponse.json({ error: 'Ranking must be an array of option IDs' }, { status: 400 });
+      }
+
+      try {
+        const updatedOptions = await updateRankVotes(
+          pollIdNum,
+          ranking as string[],
+          voterId
+        );
+        response = NextResponse.json({
+          message: 'Ranking recorded successfully',
+          options: updatedOptions,
+        });
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to record ranking';
+        return NextResponse.json({ error: message }, { status: 400 });
+      }
+    } else if (body.optionId) {
+      // Handle single vote (for multi polls)
       const { optionId } = body;
       if (!optionId) {
         return NextResponse.json({ error: 'Option ID is required' }, { status: 400 });

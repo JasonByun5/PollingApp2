@@ -306,6 +306,74 @@ export async function updatePollVotes(pollId: number, optionId: string, userId?:
   return data;
 }
 
+/**
+ * Records a full ranking with Borda scoring: 1st gets n points, 2nd n-1, etc.
+ * Inserts one vote row per option so hasUserVoted still works on the next attempt.
+ */
+export async function updateRankVotes(
+  pollId: number,
+  ranking: string[],
+  userId: string
+) {
+  const supabase = createServiceClient();
+  const poll = await getPollById(pollId);
+
+  if (poll.type !== 'rank') {
+    throw new Error('Poll is not a rank poll');
+  }
+
+  const optionIds = new Set(poll.poll_options.map((o) => o.id));
+  if (ranking.length !== poll.poll_options.length) {
+    throw new Error('Ranking must include every option exactly once');
+  }
+  if (new Set(ranking).size !== ranking.length) {
+    throw new Error('Ranking contains duplicate options');
+  }
+  if (ranking.some((id) => !optionIds.has(id))) {
+    throw new Error('Ranking contains an invalid option');
+  }
+
+  const n = ranking.length;
+  const updatedOptions = [];
+
+  for (let i = 0; i < ranking.length; i++) {
+    const optionId = ranking[i];
+    const points = n - i;
+
+    const { error: voteError } = await supabase.from('votes').insert({
+      poll_id: pollId,
+      option_id: optionId,
+      user_id: userId,
+      vote_type: 'multi',
+      created_at: new Date().toISOString(),
+    });
+
+    if (voteError) throw voteError;
+
+    const { data: currentOption, error: fetchError } = await supabase
+      .from('poll_options')
+      .select('vote_count')
+      .eq('id', optionId)
+      .single();
+
+    if (fetchError) throw fetchError;
+
+    const { data, error } = await supabase
+      .from('poll_options')
+      .update({
+        vote_count: (currentOption.vote_count || 0) + points,
+      })
+      .eq('id', optionId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    updatedOptions.push(data);
+  }
+
+  return updatedOptions;
+}
+
 // Check if user has already voted on a poll
 export async function hasUserVoted(pollId: number, userId: string): Promise<boolean> {
   const supabase = createServiceClient();

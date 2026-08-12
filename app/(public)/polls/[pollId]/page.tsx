@@ -10,6 +10,7 @@ import type { PollType } from "@/lib/poll-types";
 import { PageShell } from "@/components/page-shell";
 import { PollHeader } from "@/components/poll-header";
 import { PageEmptyState } from "@/components/empty-state";
+import { PollPageSkeleton } from "@/components/loading-skeletons";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
@@ -68,11 +69,7 @@ export default function PollVote() {
   }, [pollId]);
 
   if (loading) {
-    return (
-      <div className="flex min-h-[50vh] items-center justify-center text-muted-foreground">
-        Loading...
-      </div>
-    );
+    return <PollPageSkeleton size="lg" />;
   }
 
   if (!poll) {

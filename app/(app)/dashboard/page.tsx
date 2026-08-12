@@ -7,6 +7,7 @@ import { AuthGate } from "@/components/auth/auth-gate";
 import type { AuthUser } from "@/hooks/use-require-auth";
 import { PageShell, PageHeader } from "@/components/page-shell";
 import { EmptyState } from "@/components/empty-state";
+import { DashboardSkeleton } from "@/components/loading-skeletons";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -23,11 +24,13 @@ function DashboardPolls({ user }: { user: AuthUser }) {
   const [polls, setPolls] = useState<Poll[]>([]);
   const [hasMore, setHasMore] = useState(false);
   const [offset, setOffset] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     const fetchUserPolls = async () => {
+      setIsLoading(true);
       try {
         const res = await fetch(
           `/api/polls/by-author/${user.id}?limit=${PAGE_SIZE}&offset=0`
@@ -43,6 +46,8 @@ function DashboardPolls({ user }: { user: AuthUser }) {
         setOffset(PAGE_SIZE);
       } catch (err) {
         console.error(err instanceof Error ? err.message : 'An error occurred');
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -72,6 +77,10 @@ function DashboardPolls({ user }: { user: AuthUser }) {
       setIsLoadingMore(false);
     }
   };
+
+  if (isLoading) {
+    return <DashboardSkeleton />;
+  }
 
   return (
     <PageShell size="xl">

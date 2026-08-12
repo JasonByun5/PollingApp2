@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { PageShell } from "@/components/page-shell";
 import { Button } from "@/components/ui/button";
+import { AuthLoadingSkeleton } from "@/components/loading-skeletons";
 import { useRequireAuth, type AuthUser } from "@/hooks/use-require-auth";
 
 type AuthGateProps = {
@@ -21,11 +22,7 @@ export function AuthGate({
   const { user, isLoading } = useRequireAuth({ redirect });
 
   if (isLoading) {
-    return (
-      <div className="flex min-h-[50vh] items-center justify-center text-muted-foreground">
-        Loading...
-      </div>
-    );
+    return <AuthLoadingSkeleton />;
   }
 
   if (!user) {
