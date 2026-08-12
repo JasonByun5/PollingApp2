@@ -3,7 +3,7 @@ import {
   ALLOWED_IMAGE_TYPES,
   getImageValidationError,
   MAX_FILE_SIZE_BYTES,
-} from '@/lib/uploads';
+} from '@/lib/polls/uploads';
 
 function fakeFile(overrides: { type?: string; size?: number; name?: string } = {}) {
   const { type = 'image/png', size = 1024, name = 'photo.png' } = overrides;

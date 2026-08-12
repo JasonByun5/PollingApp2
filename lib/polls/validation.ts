@@ -1,4 +1,4 @@
-import { isPollType, type PollType } from '@/lib/poll-types';
+import { isPollType, type PollType } from '@/lib/polls/poll-types';
 
 export const POLL_LIMITS = {
   titleMax: 200,

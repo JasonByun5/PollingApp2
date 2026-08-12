@@ -1,4 +1,4 @@
-import type { PollType } from "@/lib/poll-types";
+import type { PollType } from "@/lib/polls/poll-types";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 

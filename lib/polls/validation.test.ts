@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { POLL_LIMITS, validateCreatePollPayload } from '@/lib/poll-validation';
+import { POLL_LIMITS, validateCreatePollPayload } from '@/lib/polls/validation';
 
 const validPayload = {
   title: 'Lunch spot?',

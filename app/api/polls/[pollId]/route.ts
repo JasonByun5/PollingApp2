@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getPollById, deletePoll, updatePollVotes, updateRankVotes, hasUserVoted } from '@/lib/db/polls';
+import { getPollById, deletePoll, updatePollVotes, updateRankVotes, hasUserVoted } from '@/lib/polls/db';
 import { createClient } from '@/lib/supabase/server';
 import { isAdminUser } from '@/lib/utils';
 

@@ -2,12 +2,12 @@
 
 import {useState, useRef} from "react";
 import { useRouter } from 'next/navigation';
-import { getImageValidationError } from '@/lib/uploads';
-import { POLL_TYPES, type PollType } from '@/lib/poll-types';
-import OptionCard from "../../../components/other/optionCard";
+import { getImageValidationError } from '@/lib/polls/uploads';
+import { POLL_TYPES, type PollType } from '@/lib/polls/poll-types';
+import OptionCard from "@/components/polls/option-card";
 import { AuthGate } from "@/components/auth/auth-gate";
 import type { AuthUser } from "@/hooks/use-require-auth";
-import { PageShell, PageHeader } from "@/components/page-shell";
+import { PageShell, PageHeader } from "@/components/layout/page-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

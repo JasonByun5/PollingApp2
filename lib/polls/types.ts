@@ -1,4 +1,4 @@
-import type { PollType } from '@/lib/poll-types';
+import type { PollType } from '@/lib/polls/poll-types';
 
 export interface PollOption {
   id: string;

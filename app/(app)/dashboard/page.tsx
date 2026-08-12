@@ -2,12 +2,12 @@
 
 import {useState, useEffect} from "react";
 import { useRouter } from 'next/navigation';
-import type { PollType } from '@/lib/poll-types';
+import type { PollType } from '@/lib/polls/poll-types';
 import { AuthGate } from "@/components/auth/auth-gate";
 import type { AuthUser } from "@/hooks/use-require-auth";
-import { PageShell, PageHeader } from "@/components/page-shell";
-import { EmptyState } from "@/components/empty-state";
-import { DashboardSkeleton } from "@/components/loading-skeletons";
+import { PageShell, PageHeader } from "@/components/layout/page-shell";
+import { EmptyState } from "@/components/shared/empty-state";
+import { DashboardSkeleton } from "@/components/shared/loading-skeletons";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 

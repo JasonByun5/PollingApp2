@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import OptionCard from "../optionCard";
+import OptionCard from "../option-card";
 import { Button } from "@/components/ui/button";
 
 type PollOption = {

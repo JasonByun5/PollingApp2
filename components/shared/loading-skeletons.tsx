@@ -1,4 +1,4 @@
-import { PageShell } from "@/components/page-shell";
+import { PageShell } from "@/components/layout/page-shell";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function PollPageSkeleton({ size = "lg" }: { size?: "lg" | "xl" }) {

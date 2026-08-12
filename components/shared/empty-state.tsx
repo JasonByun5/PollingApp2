@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { PageShell } from "@/components/page-shell";
+import { PageShell } from "@/components/layout/page-shell";
 
 type EmptyStateProps = {
   title: string;

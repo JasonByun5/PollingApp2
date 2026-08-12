@@ -1,7 +1,7 @@
 'use client';
 
 import { AuthButton } from "@/components/auth/auth-button";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { Suspense } from "react";
 import { useRouter } from "next/navigation";
 

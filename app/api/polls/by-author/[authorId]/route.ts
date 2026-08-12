@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { DEFAULT_PAGE_SIZE, getPollsByAuthor, MAX_PAGE_SIZE } from '@/lib/db/polls';
+import { DEFAULT_PAGE_SIZE, getPollsByAuthor, MAX_PAGE_SIZE } from '@/lib/polls/db';
 import { isAdminUser } from '@/lib/utils';
 
 function parsePositiveInt(value: string | null, fallback: number) {

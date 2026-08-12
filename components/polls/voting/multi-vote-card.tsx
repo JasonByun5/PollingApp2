@@ -1,5 +1,5 @@
 import {useState} from "react";
-import OptionCard from "../optionCard";
+import OptionCard from "../option-card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 

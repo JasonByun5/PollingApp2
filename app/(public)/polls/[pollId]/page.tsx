@@ -3,14 +3,14 @@
 import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import MultiVoteCard from "../../../../components/other/voting-options/multiVoteCard";
-import YesNoVoteCard from "../../../../components/other/voting-options/yesNoVoteCard";
-import RankVoteCard from "../../../../components/other/voting-options/rankVoteCard";
-import type { PollWithOptions } from "@/lib/types";
-import { PageShell } from "@/components/page-shell";
-import { PollHeader } from "@/components/poll-header";
-import { PageEmptyState } from "@/components/empty-state";
-import { PollPageSkeleton } from "@/components/loading-skeletons";
+import MultiVoteCard from "@/components/polls/voting/multi-vote-card";
+import YesNoVoteCard from "@/components/polls/voting/yes-no-vote-card";
+import RankVoteCard from "@/components/polls/voting/rank-vote-card";
+import type { PollWithOptions } from "@/lib/polls/types";
+import { PageShell } from "@/components/layout/page-shell";
+import { PollHeader } from "@/components/polls/poll-header";
+import { PageEmptyState } from "@/components/shared/empty-state";
+import { PollPageSkeleton } from "@/components/shared/loading-skeletons";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 

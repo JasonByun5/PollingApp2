@@ -17,6 +17,35 @@ Live demo: [http://pollify-12.vercel.app/](http://pollify-12.vercel.app/)
 - Supabase (database + authentication + storage)
 - Vercel (deployment)
 
+## Project structure
+
+Folders are grouped by **role**, not dumped flat:
+
+```
+app/                  # Routes only (Next.js App Router)
+  (app)/              # Logged-in pages: create, dashboard
+  (auth)/             # Login, sign-up, password flows
+  (public)/           # Public vote pages
+  api/                # HTTP API routes
+
+components/
+  auth/               # Auth UI (forms, gate, buttons)
+  layout/             # Shell UI used on many pages (header, page-shell)
+  polls/              # Poll-specific UI (header, option card, voting/)
+  shared/             # Reusable app UI (empty states, skeletons)
+  ui/                 # Low-level primitives (shadcn: button, input, …)
+
+lib/
+  polls/              # Poll domain: types, validation, DB helpers, uploads
+  supabase/           # Supabase clients + session helper
+  utils.ts            # Tiny shared helpers (cn, admin check)
+
+hooks/                # React hooks
+e2e/                  # Playwright tests
+```
+
+**Rule of thumb:** put UI in `components/…` by feature; put business logic (validation, DB, types) in `lib/…`; keep `app/` focused on pages and API wiring.
+
 ## Run locally
 
 ### Prerequisites

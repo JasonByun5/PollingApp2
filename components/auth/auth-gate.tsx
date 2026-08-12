@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { PageShell } from "@/components/page-shell";
+import { PageShell } from "@/components/layout/page-shell";
 import { Button } from "@/components/ui/button";
-import { AuthLoadingSkeleton } from "@/components/loading-skeletons";
+import { AuthLoadingSkeleton } from "@/components/shared/loading-skeletons";
 import { useRequireAuth, type AuthUser } from "@/hooks/use-require-auth";
 
 type AuthGateProps = {

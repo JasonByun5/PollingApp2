@@ -1,9 +1,9 @@
 import { createServiceClient } from '@/lib/supabase/server';
-import type { Poll, PollOption, PollWithOptions, Vote } from '@/lib/types';
+import type { Poll, PollOption, PollWithOptions, Vote } from '@/lib/polls/types';
 
-export type { PollType } from '@/lib/poll-types';
-export { POLL_TYPES, isPollType } from '@/lib/poll-types';
-export type { Poll, PollOption, PollWithOptions, Vote } from '@/lib/types';
+export type { PollType } from '@/lib/polls/poll-types';
+export { POLL_TYPES, isPollType } from '@/lib/polls/poll-types';
+export type { Poll, PollOption, PollWithOptions, Vote } from '@/lib/polls/types';
 
 const POLL_ID_MAX_ATTEMPTS = 8;
 

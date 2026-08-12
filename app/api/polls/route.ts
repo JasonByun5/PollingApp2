@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/server';
-import { createPoll } from '@/lib/db/polls';
-import { validateCreatePollPayload } from '@/lib/poll-validation';
-import { MAX_FILE_SIZE_BYTES, ALLOWED_IMAGE_TYPES } from '@/lib/uploads';
+import { createPoll } from '@/lib/polls/db';
+import { validateCreatePollPayload } from '@/lib/polls/validation';
+import { MAX_FILE_SIZE_BYTES, ALLOWED_IMAGE_TYPES } from '@/lib/polls/uploads';
 
 
 // creates a new poll, based on form-data submission

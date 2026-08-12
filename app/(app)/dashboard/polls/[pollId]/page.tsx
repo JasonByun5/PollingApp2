@@ -5,11 +5,11 @@ import { useRouter } from 'next/navigation';
 import { useParams } from "next/navigation";
 import { createClient } from '@/lib/supabase/client';
 import { isAdminUser } from '@/lib/utils';
-import type { PollOption, PollWithOptions } from '@/lib/types';
-import { PageShell } from "@/components/page-shell";
-import { PollHeader } from "@/components/poll-header";
-import { PageEmptyState } from "@/components/empty-state";
-import { PollPageSkeleton } from "@/components/loading-skeletons";
+import type { PollOption, PollWithOptions } from '@/lib/polls/types';
+import { PageShell } from "@/components/layout/page-shell";
+import { PollHeader } from "@/components/polls/poll-header";
+import { PageEmptyState } from "@/components/shared/empty-state";
+import { PollPageSkeleton } from "@/components/shared/loading-skeletons";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
