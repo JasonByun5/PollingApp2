@@ -90,11 +90,12 @@ export default function PollVote() {
     <div>
       {voted && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40">
-          <div className="w-80 space-y-4 rounded-xl border border-border bg-card p-6 text-center shadow-[0_8px_30px_rgba(26,31,54,0.12)]">
+          <div className="mx-4 w-full max-w-xs space-y-4 rounded-xl border border-border bg-card p-6 text-center shadow-[0_8px_30px_rgba(26,31,54,0.12)]">
             <h2 className="text-xl font-semibold text-foreground">You voted!</h2>
             <p className="text-sm text-muted-foreground">Thanks for participating.</p>
             <div className="flex justify-center">
               <Button
+                className="w-full"
                 onClick={() => {
                   setVoted(false);
                   router.push('/')

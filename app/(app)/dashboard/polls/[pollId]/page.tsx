@@ -170,7 +170,7 @@ function PollResult () {
           aria-modal="true"
           aria-labelledby="delete-poll-title"
         >
-          <div className="w-80 space-y-4 rounded-xl border border-border bg-card p-6 text-center shadow-[0_8px_30px_rgba(26,31,54,0.12)]">
+          <div className="mx-4 w-full max-w-xs space-y-4 rounded-xl border border-border bg-card p-6 text-center shadow-[0_8px_30px_rgba(26,31,54,0.12)]">
             <h2 id="delete-poll-title" className="text-xl font-semibold text-foreground">
               Delete poll?
             </h2>
@@ -233,6 +233,7 @@ function PollResult () {
             </div>
             {Array.isArray(poll.poll_options) && poll.poll_options.map((opt) => { 
               const percentage = totalVotes > 0 ? (opt.vote_count / totalVotes * 100).toFixed(1) : '0';
+              const scoreLabel = poll.type === "rank" ? "Points" : "Votes";
               return (
                 <div
                   key={opt.id}
@@ -251,8 +252,18 @@ function PollResult () {
                       <p className="text-sm text-muted-foreground">{opt.description}</p>
                     )}
                   </div>
-                  <p className="text-center text-lg text-foreground">{opt.vote_count}</p>
-                  <p className="text-center text-lg font-semibold text-primary">{percentage}%</p>
+                  <p className="text-center text-lg text-foreground">
+                    <span className="mr-2 text-xs uppercase tracking-wide text-muted-foreground sm:hidden">
+                      {scoreLabel}
+                    </span>
+                    {opt.vote_count}
+                  </p>
+                  <p className="text-center text-lg font-semibold text-primary">
+                    <span className="mr-2 text-xs font-normal uppercase tracking-wide text-muted-foreground sm:hidden">
+                      Share
+                    </span>
+                    {percentage}%
+                  </p>
                 </div>
               );
             })}
@@ -272,9 +283,9 @@ function PollResult () {
               return (
                 <div
                   key={opt.id}
-                  className="mb-3 grid grid-cols-1 items-center gap-3 rounded-lg border border-border bg-background px-4 py-4 sm:grid-cols-5 sm:gap-4"
+                  className="mb-3 grid grid-cols-2 items-center gap-3 rounded-lg border border-border bg-background px-4 py-4 sm:grid-cols-5 sm:gap-4"
                 >
-                  <div className="flex flex-col items-start gap-2 sm:items-center">
+                  <div className="col-span-2 flex flex-col items-start gap-2 sm:col-span-1 sm:items-center">
                     {opt.image_url && (
                       <img 
                         src={opt.image_url} 
@@ -282,15 +293,33 @@ function PollResult () {
                         className="mb-1 h-16 w-16 object-contain"
                       />
                     )}
-                    <p className="text-center font-medium text-foreground">{opt.title}</p>
+                    <p className="font-medium text-foreground sm:text-center">{opt.title}</p>
                     {opt.description && (
-                      <p className="text-center text-sm text-muted-foreground">{opt.description}</p>
+                      <p className="text-sm text-muted-foreground sm:text-center">{opt.description}</p>
                     )}
                   </div>
-                  <p className="text-center text-lg text-emerald-600">{opt.yes_votes || 0}</p>
-                  <p className="text-center text-lg text-destructive">{opt.no_votes || 0}</p>
-                  <p className="text-center text-lg text-muted-foreground">{opt.maybe_votes || 0}</p>
+                  <p className="text-center text-lg text-emerald-600">
+                    <span className="mb-1 block text-xs uppercase tracking-wide text-muted-foreground sm:hidden">
+                      Yes
+                    </span>
+                    {opt.yes_votes || 0}
+                  </p>
+                  <p className="text-center text-lg text-destructive">
+                    <span className="mb-1 block text-xs uppercase tracking-wide text-muted-foreground sm:hidden">
+                      No
+                    </span>
+                    {opt.no_votes || 0}
+                  </p>
+                  <p className="text-center text-lg text-muted-foreground">
+                    <span className="mb-1 block text-xs uppercase tracking-wide text-muted-foreground sm:hidden">
+                      Maybe
+                    </span>
+                    {opt.maybe_votes || 0}
+                  </p>
                   <p className="text-center text-lg font-semibold text-foreground">
+                    <span className="mb-1 block text-xs font-normal uppercase tracking-wide text-muted-foreground sm:hidden">
+                      Net
+                    </span>
                     {(opt.yes_votes || 0) - (opt.no_votes || 0)}
                   </p>
                 </div>
@@ -300,9 +329,10 @@ function PollResult () {
         )}
 
         {canDelete && (
-          <div className="mt-8 flex justify-end border-t border-border pt-6">
+          <div className="mt-8 flex justify-stretch border-t border-border pt-6 sm:justify-end">
             <Button
               variant="destructive"
+              className="w-full sm:w-auto"
               onClick={() => {
                 setDeleteError(null);
                 setShowDeleteConfirm(true);

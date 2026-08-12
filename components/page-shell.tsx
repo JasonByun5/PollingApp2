@@ -28,7 +28,7 @@ export function PageShell({
           "w-full",
           sizeMap[size],
           card &&
-            "rounded-xl border border-border bg-card px-6 py-8 shadow-[0_2px_12px_rgba(26,31,54,0.06)] sm:px-10 sm:py-10",
+            "rounded-xl border border-border bg-card px-4 py-6 shadow-[0_2px_12px_rgba(26,31,54,0.06)] sm:px-10 sm:py-10",
           className,
         )}
       >
@@ -68,7 +68,9 @@ export function PageHeader({
           </p>
         )}
       </div>
-      {action}
+      {action ? (
+        <div className="w-full shrink-0 sm:w-auto">{action}</div>
+      ) : null}
     </div>
   );
 }

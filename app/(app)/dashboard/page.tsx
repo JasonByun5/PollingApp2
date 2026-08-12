@@ -88,7 +88,7 @@ function DashboardPolls({ user }: { user: AuthUser }) {
         title="Your polls"
         description="Browse and open results for polls you've created."
         action={
-          <Button onClick={() => router.push('/create')}>
+          <Button className="w-full sm:w-auto" onClick={() => router.push('/create')}>
             Create poll
             <span aria-hidden="true">→</span>
           </Button>
@@ -120,23 +120,35 @@ function DashboardPolls({ user }: { user: AuthUser }) {
             {polls.map((poll: Poll) => (
               <li
                 key={poll.poll_id}
-                className="grid grid-cols-1 gap-2 px-4 py-4 transition-colors hover:bg-secondary/40 sm:grid-cols-[1.5fr_1fr_0.8fr_0.8fr_auto] sm:items-center sm:gap-4"
+                className="grid grid-cols-1 gap-3 px-4 py-4 transition-colors hover:bg-secondary/40 sm:grid-cols-[1.5fr_1fr_0.8fr_0.8fr_auto] sm:items-center sm:gap-4"
               >
                 <p className="font-medium text-foreground">{poll.title}</p>
-                <p className="truncate font-mono text-sm text-muted-foreground">{poll.poll_id}</p>
-                <div>
+                <p className="truncate font-mono text-sm text-muted-foreground">
+                  <span className="mr-2 font-sans text-xs uppercase tracking-wide sm:hidden">
+                    ID
+                  </span>
+                  {poll.poll_id}
+                </p>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs uppercase tracking-wide text-muted-foreground sm:hidden">
+                    Type
+                  </span>
                   <Badge variant="secondary" className="font-normal">
                     {poll.type}
                   </Badge>
                 </div>
                 <p className="text-sm text-muted-foreground">
+                  <span className="mr-2 text-xs uppercase tracking-wide sm:hidden">
+                    Created
+                  </span>
                   {new Date(poll.created_at).toLocaleDateString()}
                 </p>
-                <div className="sm:text-right">
+                <div className="pt-1 sm:pt-0 sm:text-right">
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
+                    className="w-full sm:w-auto"
                     onClick={() => router.push(`/dashboard/polls/${poll.poll_id}`)}
                   >
                     View

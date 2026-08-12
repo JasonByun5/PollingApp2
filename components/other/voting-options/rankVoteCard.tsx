@@ -209,70 +209,72 @@ function RankVoteCard({ options, pollId, setVoted }: RankVoteCardProps) {
       </p>
 
       <div className="flex flex-col justify-between gap-8 lg:flex-row">
-        <div className="grid grid-cols-[auto,1fr] gap-x-6 px-2">
-          <div className="flex flex-col space-y-6">
-            {rows.map((num) => (
-              <div
-                key={num}
-                className="flex h-24 items-center text-4xl font-semibold text-primary/40"
-              >
-                {num}
-              </div>
-            ))}
-          </div>
+        <div className="w-full overflow-x-auto pb-1">
+          <div className="grid min-w-0 grid-cols-[auto,1fr] gap-x-3 px-1 sm:gap-x-6 sm:px-2">
+            <div className="flex flex-col space-y-4 sm:space-y-6">
+              {rows.map((num) => (
+                <div
+                  key={num}
+                  className="flex h-20 items-center text-3xl font-semibold text-primary/40 sm:h-24 sm:text-4xl"
+                >
+                  {num}
+                </div>
+              ))}
+            </div>
 
-          <div className="flex flex-col space-y-6">
-            {rows.map((_, idx) => {
-              const opt = ranking[idx];
-              const image = opt ? optionImage(opt) : undefined;
-              return opt ? (
-                <div
-                  key={opt.id}
-                  draggable
-                  onDragStart={(e) => handleDragStart(e, opt)}
-                  onDragEnd={handleDragEnd}
-                  onDragOver={handleDragOver}
-                  onDrop={(e) => handleDrop(e, idx)}
-                  className={`relative flex h-24 w-24 cursor-move items-center justify-center rounded-lg border border-border bg-card p-2 shadow-[0_1px_4px_rgba(26,31,54,0.04)] transition-opacity hover:shadow-md ${
-                    draggingId === opt.id ? "opacity-40" : ""
-                  }`}
-                >
-                  <button
-                    type="button"
-                    className="absolute right-1 top-1 text-muted-foreground hover:text-destructive"
-                    onClick={() => removeFromRanking(opt.id)}
-                    aria-label={`Remove ${opt.title} from ranking`}
+            <div className="flex flex-col space-y-4 sm:space-y-6">
+              {rows.map((_, idx) => {
+                const opt = ranking[idx];
+                const image = opt ? optionImage(opt) : undefined;
+                return opt ? (
+                  <div
+                    key={opt.id}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, opt)}
+                    onDragEnd={handleDragEnd}
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleDrop(e, idx)}
+                    className={`relative flex h-20 w-20 cursor-move items-center justify-center rounded-lg border border-border bg-card p-2 shadow-[0_1px_4px_rgba(26,31,54,0.04)] transition-opacity hover:shadow-md sm:h-24 sm:w-24 ${
+                      draggingId === opt.id ? "opacity-40" : ""
+                    }`}
                   >
-                    ✕
-                  </button>
-                  {image ? (
-                    <img
-                      src={image}
-                      alt={opt.title}
-                      draggable={false}
-                      className="h-16 w-16 object-contain"
-                    />
-                  ) : (
-                    <span className="px-1 text-center text-xs font-medium text-foreground">
-                      {opt.title}
-                    </span>
-                  )}
-                </div>
-              ) : (
-                <div
-                  key={`slot-${idx}`}
-                  onDragOver={handleDragOver}
-                  onDrop={(e) => handleDrop(e, idx)}
-                  className="flex h-24 w-24 items-center justify-center rounded-lg border-2 border-dashed border-border transition-colors hover:border-primary/50 hover:bg-primary/5"
-                >
-                  <span className="text-xs text-muted-foreground">Drop</span>
-                </div>
-              );
-            })}
+                    <button
+                      type="button"
+                      className="absolute right-1 top-1 text-muted-foreground hover:text-destructive"
+                      onClick={() => removeFromRanking(opt.id)}
+                      aria-label={`Remove ${opt.title} from ranking`}
+                    >
+                      ✕
+                    </button>
+                    {image ? (
+                      <img
+                        src={image}
+                        alt={opt.title}
+                        draggable={false}
+                        className="h-12 w-12 object-contain sm:h-16 sm:w-16"
+                      />
+                    ) : (
+                      <span className="px-1 text-center text-xs font-medium text-foreground">
+                        {opt.title}
+                      </span>
+                    )}
+                  </div>
+                ) : (
+                  <div
+                    key={`slot-${idx}`}
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleDrop(e, idx)}
+                    className="flex h-20 w-20 items-center justify-center rounded-lg border-2 border-dashed border-border transition-colors hover:border-primary/50 hover:bg-primary/5 sm:h-24 sm:w-24"
+                  >
+                    <span className="text-xs text-muted-foreground">Drop</span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:flex-1">
+        <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:flex-1">
           {unranked.map((opt) => (
             <div
               key={opt.id}
@@ -294,13 +296,14 @@ function RankVoteCard({ options, pollId, setVoted }: RankVoteCardProps) {
         </div>
       </div>
 
-      <div className="flex flex-col items-end gap-2 sm:flex-row sm:items-center sm:justify-end">
+      <div className="flex w-full flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:justify-end">
         {error && (
-          <p role="alert" className="mr-auto text-sm text-destructive">
+          <p role="alert" className="text-sm text-destructive sm:mr-auto">
             {error}
           </p>
         )}
         <Button
+          className="w-full sm:w-auto"
           onClick={submitPoll}
           disabled={isSubmitting || !isComplete}
         >

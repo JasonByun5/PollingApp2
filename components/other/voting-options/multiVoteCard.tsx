@@ -73,8 +73,8 @@ function MultiVoteCard ({options, pollId, setVoted}: MultiVoteCardProps) {
         ))}
       </div>
 
-      <div className="flex justify-end">
-        <Button onClick={submitPoll}>
+      <div className="flex justify-stretch sm:justify-end">
+        <Button className="w-full sm:w-auto" onClick={submitPoll}>
           Submit vote
         </Button>
       </div>

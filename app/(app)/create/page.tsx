@@ -195,15 +195,16 @@ function NewPoll({ user }: { user: AuthUser }){
     <div>
       {showSuccess && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40">
-          <div className="w-80 space-y-4 rounded-xl border border-border bg-card p-6 text-center shadow-[0_8px_30px_rgba(26,31,54,0.12)]">
+          <div className="mx-4 w-full max-w-xs space-y-4 rounded-xl border border-border bg-card p-6 text-center shadow-[0_8px_30px_rgba(26,31,54,0.12)]">
             <h2 className="text-xl font-semibold text-foreground">Poll created</h2>
             <p className="text-sm text-muted-foreground">
               <span className="font-medium text-foreground">Poll ID</span>
               <br />
               <span className="font-mono text-foreground">{newPollId}</span>
             </p>
-            <div className="flex justify-center gap-3">
+            <div className="flex flex-col justify-center gap-3 sm:flex-row">
               <Button
+                className="w-full sm:w-auto"
                 onClick={() => {
                   setShowSuccess(false);
                   router.push("/dashboard");
@@ -213,6 +214,7 @@ function NewPoll({ user }: { user: AuthUser }){
               </Button>
               <Button
                 variant="secondary"
+                className="w-full sm:w-auto"
                 onClick={() => setShowSuccess(false)}
               >
                 Make another
@@ -356,7 +358,7 @@ function NewPoll({ user }: { user: AuthUser }){
           </div>
         </div>
 
-        <div className="mt-8 flex w-full items-center justify-between gap-4">
+        <div className="mt-8 flex w-full flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             {showAlert && (
               <div className="rounded-[6px] bg-destructive px-4 py-2 text-sm text-destructive-foreground shadow-sm">
@@ -365,6 +367,7 @@ function NewPoll({ user }: { user: AuthUser }){
             )}
           </div>
           <Button
+            className="w-full sm:w-auto"
             onClick={handleSubmitPoll}
             disabled={isSubmitting}
           >

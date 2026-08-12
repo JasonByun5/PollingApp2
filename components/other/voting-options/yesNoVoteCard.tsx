@@ -67,14 +67,14 @@ function YesNoVoteCard ({options, pollId, setVoted}: MultiVoteCardProps) {
             <OptionCard option={opt} onDelete={undefined} />
           </div>
 
-          <div className="flex flex-col items-center justify-center gap-3">
+          <div className="flex w-full flex-col items-stretch justify-center gap-3 sm:items-center">
             <button
               type="button"
               className={cn(
-                "h-12 w-32 rounded-[6px] border text-sm font-semibold transition-colors",
+                "h-12 w-full rounded-[6px] border text-sm font-semibold transition-colors sm:w-32",
                 votes[opt.id] === 'yes'
                   ? "border-emerald-600 bg-emerald-500 text-white"
-                  : "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                  : "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 dark:hover:bg-emerald-900"
               )}
               onClick={() => handleVoteSelection(opt.id, 'yes')}
             >
@@ -83,10 +83,10 @@ function YesNoVoteCard ({options, pollId, setVoted}: MultiVoteCardProps) {
             <button
               type="button"
               className={cn(
-                "h-12 w-32 rounded-[6px] border text-sm font-semibold transition-colors",
+                "h-12 w-full rounded-[6px] border text-sm font-semibold transition-colors sm:w-32",
                 votes[opt.id] === 'no'
                   ? "border-red-600 bg-red-500 text-white"
-                  : "border-red-200 bg-red-50 text-red-700 hover:bg-red-100"
+                  : "border-red-200 bg-red-50 text-red-700 hover:bg-red-100 dark:border-red-900 dark:bg-red-950 dark:text-red-300 dark:hover:bg-red-900"
               )}
               onClick={() => handleVoteSelection(opt.id, 'no')}
             >
@@ -95,7 +95,7 @@ function YesNoVoteCard ({options, pollId, setVoted}: MultiVoteCardProps) {
             <button
               type="button"
               className={cn(
-                "h-12 w-32 rounded-[6px] border text-sm font-semibold transition-colors",
+                "h-12 w-full rounded-[6px] border text-sm font-semibold transition-colors sm:w-32",
                 votes[opt.id] === 'maybe'
                   ? "border-primary bg-primary text-primary-foreground"
                   : "border-border bg-secondary text-muted-foreground hover:border-primary/40 hover:text-foreground"
@@ -108,8 +108,8 @@ function YesNoVoteCard ({options, pollId, setVoted}: MultiVoteCardProps) {
         </div>
       ))}
 
-      <div className="flex justify-center pt-2">
-        <Button onClick={submitAllVotes}>
+      <div className="flex justify-stretch pt-2 sm:justify-center">
+        <Button className="w-full sm:w-auto" onClick={submitAllVotes}>
           Submit all votes ({Object.keys(votes).length})
         </Button>
       </div>
