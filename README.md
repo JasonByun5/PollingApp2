@@ -11,11 +11,9 @@ Internal polling tool for creating, sharing, and collecting feedback — includi
 
 ## Origin
 
-Pollify started during my first internship at a new private equity firm. A team of ~20 interns built it as the firm’s first software product — partly to learn how to ship together, and partly as a real tool for voting on product features and gathering customer feedback.
+Pollify started during my first internship at a new private equity firm. I built it as the firm’s first software product for a cohort of ~20 interns — both a way for the group to engage with a real shipped tool, and a practical way to vote on product features and gather customer feedback.
 
-The initial build was collaborative. Ownership of the codebase has since moved to me: I maintain it, fix real issues, and keep hardening it as a practice product (auth, API safety, UX, tests, and CI).
-
-I am careful not to overclaim: this began as a team internship project. What I own today is the continued engineering — turning an early internal tool into something I’d be comfortable putting in front of recruiters and using as a sandbox for production-minded habits.
+I owned it end to end (product shape, implementation, and follow-through) and still maintain and harden it (auth, API safety, UX, tests, and CI) as a practice product.
 
 ## What it does
 
@@ -190,6 +188,31 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
+
+### Docker
+
+Production image (Next.js standalone). Pass the same Supabase vars used locally:
+
+```bash
+docker compose --env-file .env.local up --build
+```
+
+Or build/run without Compose:
+
+```bash
+docker build \
+  --build-arg NEXT_PUBLIC_SUPABASE_URL="$NEXT_PUBLIC_SUPABASE_URL" \
+  --build-arg NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY="$NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY" \
+  -t pollify .
+
+docker run --rm -p 3000:3000 \
+  -e NEXT_PUBLIC_SUPABASE_URL \
+  -e NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY \
+  -e SUPABASE_SERVICE_ROLE_KEY \
+  pollify
+```
+
+`NEXT_PUBLIC_*` values are baked in at **build** time; `SUPABASE_SERVICE_ROLE_KEY` is runtime-only.
 
 ## Scripts
 
