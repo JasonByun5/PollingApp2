@@ -25,12 +25,13 @@ I owned it end to end (product shape, implementation, and follow-through) and st
 <!-- SCREENSHOT: create-poll flow
      Suggested file: docs/screenshots/02-create.png
      Tip: show the create form with options / image upload if possible -->
-![Create poll — add screenshot](docs/screenshots/02-create.png)
+<img width="756" height="474.5" alt="CreatePoll" src="https://github.com/user-attachments/assets/71cd17d7-1e58-4ac7-a290-bea918c850c7" />
+
 
 <!-- SCREENSHOT: public voting page
      Suggested file: docs/screenshots/03-vote.png
      Tip: show a filled poll from a voter’s perspective -->
-![Public vote — add screenshot](docs/screenshots/03-vote.png)
+<img width="756" height="485.5" alt="Screenshot 2026-08-21 at 12 43 55 PM" src="https://github.com/user-attachments/assets/22e73ec7-c8f8-4c2e-bb09-d593ab0af7e4" />
 
 <!-- SCREENSHOT: results / dashboard detail
      Suggested file: docs/screenshots/04-results.png
